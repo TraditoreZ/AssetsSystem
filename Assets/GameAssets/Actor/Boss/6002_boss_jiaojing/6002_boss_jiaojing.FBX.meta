@@ -1,0 +1,193 @@
+fileFormatVersion: 2
+guid: acb786dd5e1b90f41a9c77ef3e2445de
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: 6002_boss_jiaojing
+    100004: Bip001
+    100006: Bip001 Head
+    100008: Bip001 L Clavicle
+    100010: Bip001 L Forearm
+    100012: Bip001 L Hand
+    100014: Bip001 L UpperArm
+    100016: Bip001 Neck
+    100018: Bip001 Pelvis
+    100020: Bip001 R Clavicle
+    100022: Bip001 R Forearm
+    100024: Bip001 R Hand
+    100026: Bip001 R UpperArm
+    100028: Bip001 Spine
+    100030: Bip001 Spine1
+    100032: body
+    100034: Bone001
+    100036: Bone002
+    100038: Bone003
+    100040: Bone009
+    100042: Bone014
+    100044: Bone015
+    100046: Bone016
+    100048: Bone018
+    100050: Bone019
+    100052: Bone020
+    100054: Bone022
+    100056: Bone023
+    100058: Bone025
+    100060: Bone026
+    100062: Bone028
+    100064: Bone029
+    100066: Bone030
+    100068: Bone032
+    100070: Bone033
+    100072: Bone034
+    100074: Bone036
+    100076: Bone037
+    100078: bottom
+    100080: center
+    100082: foot
+    100084: lefthand
+    100086: ride
+    100088: righthand
+    100090: top
+    100092: toptext
+    400000: //RootNode
+    400002: 6002_boss_jiaojing
+    400004: Bip001
+    400006: Bip001 Head
+    400008: Bip001 L Clavicle
+    400010: Bip001 L Forearm
+    400012: Bip001 L Hand
+    400014: Bip001 L UpperArm
+    400016: Bip001 Neck
+    400018: Bip001 Pelvis
+    400020: Bip001 R Clavicle
+    400022: Bip001 R Forearm
+    400024: Bip001 R Hand
+    400026: Bip001 R UpperArm
+    400028: Bip001 Spine
+    400030: Bip001 Spine1
+    400032: body
+    400034: Bone001
+    400036: Bone002
+    400038: Bone003
+    400040: Bone009
+    400042: Bone014
+    400044: Bone015
+    400046: Bone016
+    400048: Bone018
+    400050: Bone019
+    400052: Bone020
+    400054: Bone022
+    400056: Bone023
+    400058: Bone025
+    400060: Bone026
+    400062: Bone028
+    400064: Bone029
+    400066: Bone030
+    400068: Bone032
+    400070: Bone033
+    400072: Bone034
+    400074: Bone036
+    400076: Bone037
+    400078: bottom
+    400080: center
+    400082: foot
+    400084: lefthand
+    400086: ride
+    400088: righthand
+    400090: top
+    400092: toptext
+    4300000: 6002_boss_jiaojing
+    9500000: //RootNode
+    13700000: 6002_boss_jiaojing
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 6002_boss_jiaojing
+    second: {fileID: 2100000, guid: c5372658bb6f66b46bdb38ebda72f6fc, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

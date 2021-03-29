@@ -1,0 +1,157 @@
+fileFormatVersion: 2
+guid: d6a24d42aee99844680689dc04def9d6
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: 4017_monster_fuguitu
+    100004: body
+    100006: Bone001
+    100008: Bone002
+    100010: Bone003
+    100012: Bone004
+    100014: Bone005
+    100016: Bone007
+    100018: Bone008
+    100020: Bone010
+    100022: Bone011
+    100024: Bone012
+    100026: Bone013
+    100028: Bone014
+    100030: Bone016
+    100032: Bone017
+    100034: Bone018
+    100036: Bone020
+    100038: Bone021
+    100040: Bone023
+    100042: bottom
+    100044: center
+    100046: foot
+    100048: lefthand
+    100050: ride
+    100052: righthand
+    100054: top
+    100056: toptext
+    400000: //RootNode
+    400002: 4017_monster_fuguitu
+    400004: body
+    400006: Bone001
+    400008: Bone002
+    400010: Bone003
+    400012: Bone004
+    400014: Bone005
+    400016: Bone007
+    400018: Bone008
+    400020: Bone010
+    400022: Bone011
+    400024: Bone012
+    400026: Bone013
+    400028: Bone014
+    400030: Bone016
+    400032: Bone017
+    400034: Bone018
+    400036: Bone020
+    400038: Bone021
+    400040: Bone023
+    400042: bottom
+    400044: center
+    400046: foot
+    400048: lefthand
+    400050: ride
+    400052: righthand
+    400054: top
+    400056: toptext
+    4300000: 4017_monster_fuguitu
+    9500000: //RootNode
+    13700000: 4017_monster_fuguitu
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 4017_monster_fuguitu
+    second: {fileID: 2100000, guid: 7767ab8b0b35e0f4db66ac7f52c874c7, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

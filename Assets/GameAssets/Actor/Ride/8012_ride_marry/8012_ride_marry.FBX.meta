@@ -1,0 +1,211 @@
+fileFormatVersion: 2
+guid: 3b1d9d26945d1da4bb2134f0109e4297
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: 8012_ride_marry
+    100004: Bone001
+    100006: Bone009
+    100008: Bone010
+    100010: Bone011
+    100012: Bone012
+    100014: Bone013
+    100016: Bone014
+    100018: Bone015
+    100020: Bone016
+    100022: Bone017
+    100024: Bone018
+    100026: Bone019
+    100028: Bone020
+    100030: Bone022
+    100032: Bone024
+    100034: Bone035
+    100036: Bone037
+    100038: Bone038
+    100040: Bone039
+    100042: Bone040
+    100044: Bone041
+    100046: Bone042
+    100048: Bone043
+    100050: Bone044
+    100052: Bone045
+    100054: Bone046
+    100056: Bone047
+    100058: Bone048
+    100060: Bone048(mirrored)
+    100062: Bone049
+    100064: Bone049(mirrored)
+    100066: Bone050
+    100068: Bone050(mirrored)
+    100070: Bone051
+    100072: Bone051(mirrored)
+    100074: Bone052
+    100076: Bone052(mirrored)
+    100078: Bone053
+    100080: Bone054
+    100082: Bone055
+    100084: Bone056
+    100086: Bone057
+    100088: Bone058
+    100090: Bone059
+    100092: Bone060
+    100094: Bone061
+    100096: Bone062
+    100098: bottom
+    100100: Object002
+    100102: ride1
+    100104: ride2
+    100106: toptext
+    400000: //RootNode
+    400002: 8012_ride_marry
+    400004: Bone001
+    400006: Bone009
+    400008: Bone010
+    400010: Bone011
+    400012: Bone012
+    400014: Bone013
+    400016: Bone014
+    400018: Bone015
+    400020: Bone016
+    400022: Bone017
+    400024: Bone018
+    400026: Bone019
+    400028: Bone020
+    400030: Bone022
+    400032: Bone024
+    400034: Bone035
+    400036: Bone037
+    400038: Bone038
+    400040: Bone039
+    400042: Bone040
+    400044: Bone041
+    400046: Bone042
+    400048: Bone043
+    400050: Bone044
+    400052: Bone045
+    400054: Bone046
+    400056: Bone047
+    400058: Bone048
+    400060: Bone048(mirrored)
+    400062: Bone049
+    400064: Bone049(mirrored)
+    400066: Bone050
+    400068: Bone050(mirrored)
+    400070: Bone051
+    400072: Bone051(mirrored)
+    400074: Bone052
+    400076: Bone052(mirrored)
+    400078: Bone053
+    400080: Bone054
+    400082: Bone055
+    400084: Bone056
+    400086: Bone057
+    400088: Bone058
+    400090: Bone059
+    400092: Bone060
+    400094: Bone061
+    400096: Bone062
+    400098: bottom
+    400100: Object002
+    400102: ride1
+    400104: ride2
+    400106: toptext
+    4300000: 8012_ride_marry
+    4300002: Object002
+    7400000: Take 001
+    9500000: //RootNode
+    13700000: 8012_ride_marry
+    13700002: Object002
+    2186277476908879412: ImportLogs
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 8012_ride_marry
+    second: {fileID: 2100000, guid: 33a188fbcf163b7409561b0a6e0cdad6, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,28 @@
+// 场景相关资源
+//====================================================================
+Assets/(map\d+|Login)/.+ => {0}_level_assets : bigbundle // 标记这个包可以超过2M，不标记则会按序号拆开
+Assets/GameAssets/LightMaps/(map\d+)/.+ => {0}_level_assets : bigbundle
+{
+    //这里可以加上满足父节点匹配后，继续细分的子匹配规则
+    Assets/Resources/Shaders/(.+/)?.+ => main_shaders : immortal
+    Assets/Editor/External/NGUI/Resources/Shaders/.+.shader => NGUI_default_shaders : explicit | immortal
+    {
+        Assets/(map\d+|Login)/.+ => {0}_level_assets : bigbundle
+    }
+}
+//====================================================================
+// shaders 把 工程中的shader分成两个常驻内存的包
+//====================================================================
+Assets/Resources/Shaders/(.+/)?.+ => main_shaders : immortal
+//Assets/Editor/External/NGUI/Resources/Shaders/.+.shader => NGUI_default_shaders : explicit | immortal
+//===================================================================
+// 角色相关测试
+//Assets/Resources/Actor/(.+?)/.+ => {0}_prefab
+//Assets/GameAssets/Actor/(.+?)/.+ => {0}_prefab
+//Assets/GameAssets/Actor/.+/(.+?)/.+ => {0}_prefab
+//Assets/GameAssets/Actor/(.+?)/.+ => {0}_asset
+Assets/GameAssets/Actor/(.+?)/.+ => fffff_asset
+
+//Assets/GameAssets/Animation/(.+?)/.+ => {0}_animation
+//Assets/Resources/Animation/.* => animations
+//Assets/Scenes/(\w*) => {0}_level

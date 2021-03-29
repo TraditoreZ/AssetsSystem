@@ -1,0 +1,304 @@
+fileFormatVersion: 2
+guid: c1bcce2d2077a464aa7743a6be984195
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: 2003_player_chiyang
+    100002: //RootNode
+    100004: Bip001
+    100006: Bip001 Head
+    100008: Bip001 L Calf
+    100010: Bip001 L Clavicle
+    100012: Bip001 L Foot
+    100014: Bip001 L Forearm
+    100016: Bip001 L Hand
+    100018: Bip001 L Thigh
+    100020: Bip001 L Toe0
+    100022: Bip001 L UpperArm
+    100024: Bip001 Neck
+    100026: Bip001 Pelvis
+    100028: Bip001 Prop1
+    100030: Bip001 R Calf
+    100032: Bip001 R Clavicle
+    100034: Bip001 R Foot
+    100036: Bip001 R Forearm
+    100038: Bip001 R Hand
+    100040: Bip001 R Thigh
+    100042: Bip001 R Toe0
+    100044: Bip001 R UpperArm
+    100046: Bip001 Spine
+    100048: Bip001 Spine1
+    100050: Bip002
+    100052: Bip002 Head
+    100054: Bip002 L Calf
+    100056: Bip002 L Clavicle
+    100058: Bip002 L Finger0
+    100060: Bip002 L Foot
+    100062: Bip002 L Forearm
+    100064: Bip002 L Hand
+    100066: Bip002 L Thigh
+    100068: Bip002 L Toe0
+    100070: Bip002 L UpperArm
+    100072: Bip002 Neck
+    100074: Bip002 Pelvis
+    100076: Bip002 R Calf
+    100078: Bip002 R Clavicle
+    100080: Bip002 R Finger0
+    100082: Bip002 R Foot
+    100084: Bip002 R Forearm
+    100086: Bip002 R Hand
+    100088: Bip002 R Thigh
+    100090: Bip002 R Toe0
+    100092: Bip002 R UpperArm
+    100094: Bip002 Spine
+    100096: Bip002 Spine1
+    100098: body
+    100100: Bone001
+    100102: Bone009
+    100104: Bone010
+    100106: Bone011
+    100108: Bone015
+    100110: Bone016
+    100112: Bone017
+    100114: Bone019
+    100116: Bone021
+    100118: Bone023
+    100120: Bone024
+    100122: Bone025
+    100124: Bone027
+    100126: Bone028
+    100128: Bone030
+    100130: Bone031
+    100132: Bone032
+    100134: Bone038
+    100136: Bone039
+    100138: Bone040
+    100140: Bone042
+    100142: Bone043
+    100144: Bone044
+    100146: Bone052
+    100148: Bone060
+    100150: Bone061
+    100152: Bone062
+    100154: Bone064
+    100156: Bone065
+    100158: Bone066
+    100160: Bone068
+    100162: Bone069
+    100164: Bone071
+    100166: Bone072
+    100168: Bone074
+    100170: Bone075
+    100172: Bone076
+    100174: Bone078
+    100176: Bone079
+    100178: Bone080
+    100180: bottom
+    100182: center
+    100184: follow
+    100186: follow_plus
+    100188: foot
+    100190: lefthand
+    100192: ride
+    100194: righthand
+    100196: top
+    100198: toptext
+    100200: weapon
+    100202: weapon_plus
+    400000: 2003_player_chiyang
+    400002: //RootNode
+    400004: Bip001
+    400006: Bip001 Head
+    400008: Bip001 L Calf
+    400010: Bip001 L Clavicle
+    400012: Bip001 L Foot
+    400014: Bip001 L Forearm
+    400016: Bip001 L Hand
+    400018: Bip001 L Thigh
+    400020: Bip001 L Toe0
+    400022: Bip001 L UpperArm
+    400024: Bip001 Neck
+    400026: Bip001 Pelvis
+    400028: Bip001 Prop1
+    400030: Bip001 R Calf
+    400032: Bip001 R Clavicle
+    400034: Bip001 R Foot
+    400036: Bip001 R Forearm
+    400038: Bip001 R Hand
+    400040: Bip001 R Thigh
+    400042: Bip001 R Toe0
+    400044: Bip001 R UpperArm
+    400046: Bip001 Spine
+    400048: Bip001 Spine1
+    400050: Bip002
+    400052: Bip002 Head
+    400054: Bip002 L Calf
+    400056: Bip002 L Clavicle
+    400058: Bip002 L Finger0
+    400060: Bip002 L Foot
+    400062: Bip002 L Forearm
+    400064: Bip002 L Hand
+    400066: Bip002 L Thigh
+    400068: Bip002 L Toe0
+    400070: Bip002 L UpperArm
+    400072: Bip002 Neck
+    400074: Bip002 Pelvis
+    400076: Bip002 R Calf
+    400078: Bip002 R Clavicle
+    400080: Bip002 R Finger0
+    400082: Bip002 R Foot
+    400084: Bip002 R Forearm
+    400086: Bip002 R Hand
+    400088: Bip002 R Thigh
+    400090: Bip002 R Toe0
+    400092: Bip002 R UpperArm
+    400094: Bip002 Spine
+    400096: Bip002 Spine1
+    400098: body
+    400100: Bone001
+    400102: Bone009
+    400104: Bone010
+    400106: Bone011
+    400108: Bone015
+    400110: Bone016
+    400112: Bone017
+    400114: Bone019
+    400116: Bone021
+    400118: Bone023
+    400120: Bone024
+    400122: Bone025
+    400124: Bone027
+    400126: Bone028
+    400128: Bone030
+    400130: Bone031
+    400132: Bone032
+    400134: Bone038
+    400136: Bone039
+    400138: Bone040
+    400140: Bone042
+    400142: Bone043
+    400144: Bone044
+    400146: Bone052
+    400148: Bone060
+    400150: Bone061
+    400152: Bone062
+    400154: Bone064
+    400156: Bone065
+    400158: Bone066
+    400160: Bone068
+    400162: Bone069
+    400164: Bone071
+    400166: Bone072
+    400168: Bone074
+    400170: Bone075
+    400172: Bone076
+    400174: Bone078
+    400176: Bone079
+    400178: Bone080
+    400180: bottom
+    400182: center
+    400184: follow
+    400186: follow_plus
+    400188: foot
+    400190: lefthand
+    400192: ride
+    400194: righthand
+    400196: top
+    400198: toptext
+    400200: weapon
+    400202: weapon_plus
+    4300000: 2003_player_chiyang
+    7400000: Take 001
+    9500000: //RootNode
+    13700000: 2003_player_chiyang
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 2003_player_chiyang
+    second: {fileID: 2100000, guid: 738f4defa9747c040a872e6f206e1b4b, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

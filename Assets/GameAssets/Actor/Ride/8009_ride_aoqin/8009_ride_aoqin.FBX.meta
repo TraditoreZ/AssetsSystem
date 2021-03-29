@@ -1,0 +1,218 @@
+fileFormatVersion: 2
+guid: 86c812dc3138a384294c69aa11f50ef8
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: 8009_ride_aoqin
+    100004: Bone001
+    100006: Bone002
+    100008: Bone003
+    100010: Bone004
+    100012: Bone005
+    100014: Bone006
+    100016: Bone007
+    100018: Bone008
+    100020: Bone009
+    100022: Bone010
+    100024: Bone011
+    100026: Bone012
+    100028: Bone013
+    100030: Bone013(mirrored)
+    100032: Bone014
+    100034: Bone014(mirrored)
+    100036: Bone015
+    100038: Bone015(mirrored)
+    100040: Bone016
+    100042: Bone016(mirrored)
+    100044: Bone017
+    100046: Bone017(mirrored)
+    100048: Bone018
+    100050: Bone018(mirrored)
+    100052: Bone019
+    100054: Bone019(mirrored)
+    100056: Bone020
+    100058: Bone020(mirrored)
+    100060: Bone021
+    100062: Bone022
+    100064: Bone022(mirrored)
+    100066: Bone023
+    100068: Bone023(mirrored)
+    100070: Bone024
+    100072: Bone024(mirrored)
+    100074: Bone025
+    100076: Bone025(mirrored)
+    100078: Bone026
+    100080: Bone026(mirrored)
+    100082: Bone027
+    100084: Bone027(mirrored)
+    100086: Bone028
+    100088: Bone028(mirrored)
+    100090: Bone029
+    100092: Bone030
+    100094: Bone031
+    100096: Bone032
+    100098: Bone033
+    100100: Bone034
+    100102: bottom
+    100104: center
+    100106: ride01
+    100108: ride02
+    100110: ride03
+    100112: ride04
+    100114: ride05
+    100116: toptext
+    400000: //RootNode
+    400002: 8009_ride_aoqin
+    400004: Bone001
+    400006: Bone002
+    400008: Bone003
+    400010: Bone004
+    400012: Bone005
+    400014: Bone006
+    400016: Bone007
+    400018: Bone008
+    400020: Bone009
+    400022: Bone010
+    400024: Bone011
+    400026: Bone012
+    400028: Bone013
+    400030: Bone013(mirrored)
+    400032: Bone014
+    400034: Bone014(mirrored)
+    400036: Bone015
+    400038: Bone015(mirrored)
+    400040: Bone016
+    400042: Bone016(mirrored)
+    400044: Bone017
+    400046: Bone017(mirrored)
+    400048: Bone018
+    400050: Bone018(mirrored)
+    400052: Bone019
+    400054: Bone019(mirrored)
+    400056: Bone020
+    400058: Bone020(mirrored)
+    400060: Bone021
+    400062: Bone022
+    400064: Bone022(mirrored)
+    400066: Bone023
+    400068: Bone023(mirrored)
+    400070: Bone024
+    400072: Bone024(mirrored)
+    400074: Bone025
+    400076: Bone025(mirrored)
+    400078: Bone026
+    400080: Bone026(mirrored)
+    400082: Bone027
+    400084: Bone027(mirrored)
+    400086: Bone028
+    400088: Bone028(mirrored)
+    400090: Bone029
+    400092: Bone030
+    400094: Bone031
+    400096: Bone032
+    400098: Bone033
+    400100: Bone034
+    400102: bottom
+    400104: center
+    400106: ride01
+    400108: ride02
+    400110: ride03
+    400112: ride04
+    400114: ride05
+    400116: toptext
+    4300000: 8009_ride_aoqin
+    7400000: Take 001
+    9500000: //RootNode
+    13700000: 8009_ride_aoqin
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 8009_ride_aoqin
+    second: {fileID: 2100000, guid: 0e5cfecf43ae50a45a30afa9deb7249a, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

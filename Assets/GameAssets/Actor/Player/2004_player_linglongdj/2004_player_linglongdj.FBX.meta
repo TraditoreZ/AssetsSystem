@@ -1,0 +1,277 @@
+fileFormatVersion: 2
+guid: 2ab9205dac5803c4db37a008fae69cb6
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: 2004_player_linglong
+    100002: //RootNode
+    100004: Bip001
+    100006: Bip001 Head
+    100008: Bip001 L Calf
+    100010: Bip001 L Clavicle
+    100012: Bip001 L Finger0
+    100014: Bip001 L Foot
+    100016: Bip001 L Forearm
+    100018: Bip001 L Hand
+    100020: Bip001 L Thigh
+    100022: Bip001 L Toe0
+    100024: Bip001 L UpperArm
+    100026: Bip001 Neck
+    100028: Bip001 Pelvis
+    100030: Bip001 Prop1
+    100032: Bip001 R Calf
+    100034: Bip001 R Clavicle
+    100036: Bip001 R Finger0
+    100038: Bip001 R Foot
+    100040: Bip001 R Forearm
+    100042: Bip001 R Hand
+    100044: Bip001 R Thigh
+    100046: Bip001 R Toe0
+    100048: Bip001 R UpperArm
+    100050: Bip001 Spine
+    100052: Bip001 Spine1
+    100054: Bip002
+    100056: Bip002 Head
+    100058: Bip002 L Clavicle
+    100060: Bip002 L Finger0
+    100062: Bip002 L Forearm
+    100064: Bip002 L Hand
+    100066: Bip002 L UpperArm
+    100068: Bip002 Neck
+    100070: Bip002 Pelvis
+    100072: Bip002 R Clavicle
+    100074: Bip002 R Finger0
+    100076: Bip002 R Forearm
+    100078: Bip002 R Hand
+    100080: Bip002 R UpperArm
+    100082: Bip002 Spine
+    100084: Bip002 Spine1
+    100086: body
+    100088: Bone018
+    100090: Bone019
+    100092: Bone020
+    100094: Bone022
+    100096: Bone023
+    100098: Bone024
+    100100: Bone026
+    100102: Bone027
+    100104: Bone028
+    100106: Bone030
+    100108: Bone031
+    100110: Bone032
+    100112: Bone034
+    100114: Bone035
+    100116: Bone036
+    100118: Bone038
+    100120: Bone039
+    100122: Bone041
+    100124: Bone042
+    100126: Bone043
+    100128: Bone044
+    100130: Bone046
+    100132: Bone047
+    100134: Bone048
+    100136: Bone050
+    100138: Bone051
+    100140: Bone053
+    100142: Bone054
+    100144: Bone060
+    100146: Bone061
+    100148: Bone063
+    100150: Bone064
+    100152: Bone066
+    100154: bottom
+    100156: center
+    100158: follow
+    100160: follow_plus
+    100162: foot
+    100164: lefthand
+    100166: ride
+    100168: righthand
+    100170: top
+    100172: toptext
+    100174: weapon
+    100176: weapon_plus
+    400000: 2004_player_linglong
+    400002: //RootNode
+    400004: Bip001
+    400006: Bip001 Head
+    400008: Bip001 L Calf
+    400010: Bip001 L Clavicle
+    400012: Bip001 L Finger0
+    400014: Bip001 L Foot
+    400016: Bip001 L Forearm
+    400018: Bip001 L Hand
+    400020: Bip001 L Thigh
+    400022: Bip001 L Toe0
+    400024: Bip001 L UpperArm
+    400026: Bip001 Neck
+    400028: Bip001 Pelvis
+    400030: Bip001 Prop1
+    400032: Bip001 R Calf
+    400034: Bip001 R Clavicle
+    400036: Bip001 R Finger0
+    400038: Bip001 R Foot
+    400040: Bip001 R Forearm
+    400042: Bip001 R Hand
+    400044: Bip001 R Thigh
+    400046: Bip001 R Toe0
+    400048: Bip001 R UpperArm
+    400050: Bip001 Spine
+    400052: Bip001 Spine1
+    400054: Bip002
+    400056: Bip002 Head
+    400058: Bip002 L Clavicle
+    400060: Bip002 L Finger0
+    400062: Bip002 L Forearm
+    400064: Bip002 L Hand
+    400066: Bip002 L UpperArm
+    400068: Bip002 Neck
+    400070: Bip002 Pelvis
+    400072: Bip002 R Clavicle
+    400074: Bip002 R Finger0
+    400076: Bip002 R Forearm
+    400078: Bip002 R Hand
+    400080: Bip002 R UpperArm
+    400082: Bip002 Spine
+    400084: Bip002 Spine1
+    400086: body
+    400088: Bone018
+    400090: Bone019
+    400092: Bone020
+    400094: Bone022
+    400096: Bone023
+    400098: Bone024
+    400100: Bone026
+    400102: Bone027
+    400104: Bone028
+    400106: Bone030
+    400108: Bone031
+    400110: Bone032
+    400112: Bone034
+    400114: Bone035
+    400116: Bone036
+    400118: Bone038
+    400120: Bone039
+    400122: Bone041
+    400124: Bone042
+    400126: Bone043
+    400128: Bone044
+    400130: Bone046
+    400132: Bone047
+    400134: Bone048
+    400136: Bone050
+    400138: Bone051
+    400140: Bone053
+    400142: Bone054
+    400144: Bone060
+    400146: Bone061
+    400148: Bone063
+    400150: Bone064
+    400152: Bone066
+    400154: bottom
+    400156: center
+    400158: follow
+    400160: follow_plus
+    400162: foot
+    400164: lefthand
+    400166: ride
+    400168: righthand
+    400170: top
+    400172: toptext
+    400174: weapon
+    400176: weapon_plus
+    4300000: 2004_player_linglong
+    9500000: //RootNode
+    13700000: 2004_player_linglong
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 2004_player_linglong
+    second: {fileID: 2100000, guid: cf09f7470543a1340a20b537be1524de, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
