@@ -45,8 +45,6 @@ public class AssetSystemCore : MonoBehaviour
                 break;
             case LoadType.Resource:
                 break;
-            case LoadType.IO:
-                break;
         }
         m_Loader.Initialize(root);
     }

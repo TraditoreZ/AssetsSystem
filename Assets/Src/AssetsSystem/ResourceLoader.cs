@@ -5,11 +5,11 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 public class ResourceLoader : IAssetLoader
 {
-    private Dictionary<string, IAssetPack> packMapping;
+    private Dictionary<string, IAssetPackage> packMapping;
 
     public void Initialize(string root)
     {
-        packMapping = new Dictionary<string, IAssetPack>();
+        packMapping = new Dictionary<string, IAssetPackage>();
     }
 
 
