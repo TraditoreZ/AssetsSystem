@@ -1,9 +1,12 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
-public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
+
+public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
 {
     // Resource为虚拟包概念 故很多接口无需实现
     private string packagePath;
@@ -27,7 +30,8 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
         Object targer;
         if (!assetMapping.TryGetValue(path, out targer))
         {
-            targer = Resources.Load(path);
+            Debug.Log(path);
+            targer = AssetDatabase.LoadAssetAtPath<Object>(path);
             assetMapping.Add(path, targer);
         }
         return targer;
@@ -35,7 +39,7 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
 
     public Object[] LoadAll()
     {
-        Object[] assets = Resources.LoadAll(packagePath);
+        Object[] assets = AssetDatabase.LoadAllAssetsAtPath(packagePath);
         foreach (Object asset in assets)
         {
             string path = packagePath + asset.name;
@@ -49,46 +53,27 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
 
     public void LoadAsync(string path, Action<Object> callback)
     {
-        Object targer;
-        if (assetMapping.TryGetValue(path, out targer))
-        {
-            callback?.Invoke(targer);
-        }
-        else
-        {
-            if (asyncLoading.Add(path))
-            {
-                if (!singleCallBackDic.ContainsKey(path))
-                {
-                    singleCallBackDic.Add(path, new HashSet<Action<Object>>());
-                }
-                singleCallBackDic[path].Add(callback);
-                Resources.LoadAsync(path).completed += OnLoadCompleted;
-            }
-            else
-            {
-                singleCallBackDic[path].Add(callback);
-            }
-        }
+        AssetSystemCore.Instance.StartCoroutine(IELoadAsync(path, callback));
     }
 
-    private void OnLoadCompleted(AsyncOperation obj)
+
+    private IEnumerator IELoadAsync(string path, Action<Object> callback)
     {
-        ResourceRequest requset = obj as ResourceRequest;
-        requset.completed -= OnLoadCompleted;
-        string path = GetAssetPath(requset.asset.name);
-        Debug.Log(path);
-        assetMapping.Add(path, requset.asset);
-        asyncLoading.Remove(path);
-        foreach (Action<Object> call in singleCallBackDic[path])
-        {
-            call?.Invoke(requset.asset);
-        }
-        singleCallBackDic[path].Clear();
+        // 模拟延迟
+        yield return new WaitForSeconds(AssetSystemCore.Instance.SimulateIODelay ? UnityEngine.Random.Range(0, 1f) : 0);
+        callback?.Invoke(Load(path));
     }
+
 
     public void LoadAllAsync(Action<Object[]> callback)
     {
+        AssetSystemCore.Instance.StartCoroutine(IELoadAllAsync(callback));
+    }
+
+    private IEnumerator IELoadAllAsync(Action<Object[]> callback)
+    {
+        // 模拟延迟
+        yield return new WaitForSeconds(AssetSystemCore.Instance.SimulateIODelay ? UnityEngine.Random.Range(0, 1f) : 0);
         callback?.Invoke(LoadAll());
     }
 
@@ -147,3 +132,4 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
         return string.Format("{0}/{1}", packagePath, assetName);
     }
 }
+#endif

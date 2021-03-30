@@ -1,22 +1,25 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
-public class ResourceLoader : IAssetLoader
+
+public class AdbLoader : IAssetLoader
 {
+    // AssetDatabase用于编辑器预览
     private Dictionary<string, IAssetPackage> packMapping;
+    private string root;
     public void Initialize(string root)
     {
+        this.root = root;
         packMapping = new Dictionary<string, IAssetPackage>();
     }
-
 
     public void Destory()
     {
 
     }
-
 
     public Object Load(string path)
     {
@@ -26,7 +29,8 @@ public class ResourceLoader : IAssetLoader
 
     public Object[] LoadAll(string path)
     {
-        return LoadPackage(path, false).LoadAll();
+        string packagePath = GetPackageName(path);
+        return LoadPackage(packagePath, false).LoadAll();
     }
 
 
@@ -38,7 +42,8 @@ public class ResourceLoader : IAssetLoader
 
     public void LoadAllAsync(string path, Action<Object[]> callback)
     {
-        LoadPackage(path, true).LoadAllAsync(callback);
+        string packagePath = GetPackageName(path);
+        LoadPackage(packagePath, true).LoadAllAsync(callback);
     }
 
     public void Unload(string path)
@@ -47,7 +52,7 @@ public class ResourceLoader : IAssetLoader
         if (IsPackageCreated(packagePath))
         {
             IAssetPackage package = LoadPackage(packagePath, false);
-            package.Unload(path);
+            package.Unload(root + path);
             if (package.LoadCount() == 0)
             {
                 UnloadPackage(packagePath);
@@ -78,6 +83,7 @@ public class ResourceLoader : IAssetLoader
 
     public void UnloadAll(string packagePath)
     {
+        packagePath = GetPackageName(packagePath);
         if (IsPackageCreated(packagePath))
         {
             LoadPackage(packagePath, false).UnloadAll();
@@ -87,15 +93,16 @@ public class ResourceLoader : IAssetLoader
 
     public bool IsPackageCreated(string path)
     {
-        return packMapping.ContainsKey(path);
+        return packMapping.ContainsKey(root + path);
     }
 
     private IAssetPackage LoadPackage(string packagePath, bool asyncLoaded)
     {
         IAssetPackage package;
+        packagePath = GetPackageName(packagePath);
         if (!packMapping.TryGetValue(packagePath, out package))
         {
-            package = ResourcePackage.CreateObject();
+            package = AdbPackage.CreateObject();
             packMapping.Add(packagePath, package);
             package.LoadPackage(packagePath, asyncLoaded);
         }
@@ -105,11 +112,12 @@ public class ResourceLoader : IAssetLoader
     private void UnloadPackage(string packagePath)
     {
         IAssetPackage package;
+        packagePath = GetPackageName(packagePath);
         if (packMapping.TryGetValue(packagePath, out package))
         {
             packMapping.Remove(packagePath);
             package.UnloadPackage();
-            ResourcePackage.ReclaimObject(package as ResourcePackage);
+            AdbPackage.ReclaimObject(package as AdbPackage);
         }
     }
 
@@ -119,3 +127,4 @@ public class ResourceLoader : IAssetLoader
     }
 
 }
+#endif

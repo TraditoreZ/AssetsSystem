@@ -23,6 +23,15 @@ public class AssetSystemCore : MonoBehaviour
         }
     }
 
+    public bool SimulateIODelay
+    {
+        get
+        {
+            return m_simulateIODelay;
+        }
+    }
+    private bool m_simulateIODelay;
+
     void Awake()
     {
         if (_instance != null)
@@ -35,16 +44,23 @@ public class AssetSystemCore : MonoBehaviour
     }
 
 
-    public void Initialize(string root, LoadType _loadType)
+    public void Initialize(string root, LoadType _loadType, bool simulateIODelay = false)
     {
         m_loadType = _loadType;
+        m_simulateIODelay = simulateIODelay;
         switch (m_loadType)
         {
             case LoadType.AssetBundle:
                 m_Loader = new BundleLoader();
                 break;
             case LoadType.Resource:
+                m_Loader = new ResourceLoader();
                 break;
+#if UNITY_EDITOR
+            case LoadType.AssetDatabase:
+                m_Loader = new AdbLoader();
+                break;
+#endif
         }
         m_Loader.Initialize(root);
     }
