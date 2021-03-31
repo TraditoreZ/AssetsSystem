@@ -60,12 +60,14 @@ namespace TF.AssetEditor
                 Dictionary<string, ABPackage> packsDic = BuildAssetBundlePack(assetPaths.ToArray());
                 Debug.Log("BuildAssetBundlePack:" + (System.Diagnostics.Stopwatch.GetTimestamp() - timeStamp) * 1000 / System.Diagnostics.Stopwatch.Frequency + "ms");
                 List<AssetBundleBuild> abbs = new List<AssetBundleBuild>();
+                Debug.Log(packsDic.Count);
                 foreach (var pack in packsDic.Values)
                 {
-                    Debug.Log(pack.packageName + "   " + pack.size_MB);
+                    Debug.Log(pack.packageName);
                     AssetBundleBuild abb = new AssetBundleBuild();
                     abb.assetBundleName = pack.packageName;
                     abb.assetNames = pack.assets.ToArray();
+                    Debug.Log(abb.assetNames.Length);
                     abbs.Add(abb);
                  }
 
