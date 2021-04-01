@@ -56,36 +56,28 @@ namespace TF.AssetEditor
                         assetPaths.Add(path);
                     }
                 }
-                long timeStamp = System.Diagnostics.Stopwatch.GetTimestamp();
                 Dictionary<string, ABPackage> packsDic = BuildAssetBundlePack(assetPaths.ToArray());
-                Debug.Log("BuildAssetBundlePack:" + (System.Diagnostics.Stopwatch.GetTimestamp() - timeStamp) * 1000 / System.Diagnostics.Stopwatch.Frequency + "ms");
-                List<AssetBundleBuild> abbs = new List<AssetBundleBuild>();
-                Debug.Log(packsDic.Count);
+                List<AssetBundleBuild> abbLists = new List<AssetBundleBuild>();
+                int index = 0;
+                int max = packsDic.Values.Count;
                 foreach (var pack in packsDic.Values)
                 {
-                    Debug.Log(pack.packageName);
+                    EditorUtility.DisplayCancelableProgressBar("Create AssetPackage", string.Format("{0}     {1}:mb", pack.packageName, pack.size_MB), (float)index++ / max);
                     AssetBundleBuild abb = new AssetBundleBuild();
                     abb.assetBundleName = pack.packageName;
                     abb.assetNames = pack.assets.ToArray();
-                    Debug.Log(abb.assetNames.Length);
-                    abbs.Add(abb);
-                 }
+                    abbLists.Add(abb);
+                }
 
                 // 如果运行时采用正则表达式 那么可以不需要这张表了
-                CreateABConfig(packsDic);
+                //CreateABConfig(packsDic);
                 //根据BuildSetting里面所激活的平台进行打包 设置过AssetBundleName的都会进行打包  
-                timeStamp = System.Diagnostics.Stopwatch.GetTimestamp();
-                BuildPipeline.BuildAssetBundles(outputPath, abbs.ToArray(), options, buildTarget);
-                Debug.Log("BuildAssetBundles:" + (System.Diagnostics.Stopwatch.GetTimestamp() - timeStamp) * 1000 / System.Diagnostics.Stopwatch.Frequency + "ms");
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogError("BuildAssetBundle Error:" + ex);
+                //BuildPipeline.BuildAssetBundles(outputPath, options, buildTarget);
+                BuildPipeline.BuildAssetBundles(outputPath, abbLists.ToArray(), options, buildTarget);
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
-                //ClearAssetBundlesName();
             }
         }
 
@@ -120,7 +112,7 @@ namespace TF.AssetEditor
             sw.Close();
             fs.Close();
         }
- 
+
         static void CreateABPackByRule(string assetPath, Dictionary<string, ABPackage> packs)
         {
 
@@ -139,24 +131,12 @@ namespace TF.AssetEditor
                         pack.options = info.options;
                         packs.Add(info.packName, pack);
                     }
+                    if (pack.assets.Add(assetPath))
+                    {
+                        pack.size_MB += (new System.IO.FileInfo(assetPath).Length / 1048576f); // byte => mb
+                    }
                 }
             }
-        }
-
-        /// <summary>  
-        /// 清除之前设置过的AssetBundleName，避免产生不必要的资源也打包  
-        /// 之前说过，只要设置了AssetBundleName的，都会进行打包，不论在什么目录下  
-        /// </summary>  
-        static void ClearAssetBundlesName()
-        {
-            string[] oldAssetBundleNames = AssetDatabase.GetAllAssetBundleNames();
-            for (int j = 0; j < oldAssetBundleNames.Length; j++)
-            {
-                AssetDatabase.RemoveAssetBundleName(oldAssetBundleNames[j], true);
-                EditorUtility.DisplayCancelableProgressBar("Clear AssetBundleName", oldAssetBundleNames[j], (float)j / oldAssetBundleNames.Length);
-            }
-            EditorUtility.ClearProgressBar();
-            System.GC.Collect();
         }
 
     }

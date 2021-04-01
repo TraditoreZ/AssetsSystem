@@ -10,6 +10,8 @@ namespace TF.AssetEditor
 
         public HashSet<string> assets = new HashSet<string>();
 
+        public double size_MB;
+
         public string[] options;
     }
 }
