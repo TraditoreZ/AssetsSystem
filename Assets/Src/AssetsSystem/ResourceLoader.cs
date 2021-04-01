@@ -44,7 +44,7 @@ public class ResourceLoader : IAssetLoader
     public void Unload(string path)
     {
         string packagePath = GetPackageName(path);
-        if (IsPackageCreated(packagePath))
+        if (packMapping.ContainsKey(packagePath))
         {
             IAssetPackage package = LoadPackage(packagePath, false);
             package.Unload(path);
@@ -78,16 +78,11 @@ public class ResourceLoader : IAssetLoader
 
     public void UnloadAll(string packagePath)
     {
-        if (IsPackageCreated(packagePath))
+        if (packMapping.ContainsKey(packagePath))
         {
             LoadPackage(packagePath, false).UnloadAll();
             UnloadPackage(packagePath);
         }
-    }
-
-    public bool IsPackageCreated(string path)
-    {
-        return packMapping.ContainsKey(path);
     }
 
     private IAssetPackage LoadPackage(string packagePath, bool asyncLoaded)
@@ -113,7 +108,7 @@ public class ResourceLoader : IAssetLoader
         }
     }
 
-    public string GetPackageName(string path)
+    private string GetPackageName(string path)
     {
         return path.Substring(0, path.LastIndexOf('/'));
     }

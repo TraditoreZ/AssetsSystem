@@ -5,7 +5,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
 {
-    // Resource为虚拟包概念 故很多接口无需实现
+    // Resource为虚拟包概念
     private string packagePath;
     private Dictionary<string, Object> assetMapping = new Dictionary<string, Object>();
     private HashSet<string> asyncLoading = new HashSet<string>();

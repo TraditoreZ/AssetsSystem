@@ -23,6 +23,7 @@ public class AssetSystemCore : MonoBehaviour
         }
     }
 
+    /// <summary> AssetDatabase模式下模拟异步IO加载延迟, 建议开发阶段开启 用于发现异步导致逻辑的BUG </summary>
     public bool SimulateIODelay
     {
         get

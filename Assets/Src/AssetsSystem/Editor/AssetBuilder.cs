@@ -5,14 +5,15 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
+using TF.AssetSystem;
+
 namespace TF.AssetEditor
 {
     public class AssetBuilder : Editor
     {
         //====================================================================================================================
         const string configPath = "Assets/Src/AssetsSystem/Editor/exampleCfg";
-        const string outputPath = "./Bundles";
-        const BuildAssetBundleOptions options = BuildAssetBundleOptions.UncompressedAssetBundle;//BuildAssetBundleOptions.ChunkBasedCompression;
+        const BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression;//BuildAssetBundleOptions.ChunkBasedCompression;
         //==============================================================================================================
         private static AssetBundleRule[] rules;
 
@@ -37,15 +38,13 @@ namespace TF.AssetEditor
             BuildAssetBundle(BuildTarget.iOS);
         }
 
-
-
         public static void BuildAssetBundle(BuildTarget buildTarget = BuildTarget.StandaloneWindows64)
         {
             try
             {
-                if (!System.IO.Directory.Exists(outputPath))
+                if (!System.IO.Directory.Exists(GetOutPath(buildTarget)))
                 {
-                    System.IO.Directory.CreateDirectory(outputPath);
+                    System.IO.Directory.CreateDirectory(GetOutPath(buildTarget));
                 }
                 string[] unityAssetPaths = AssetDatabase.GetAllAssetPaths();
                 List<string> assetPaths = new List<string>();
@@ -73,11 +72,32 @@ namespace TF.AssetEditor
                 //CreateABConfig(packsDic);
                 //根据BuildSetting里面所激活的平台进行打包 设置过AssetBundleName的都会进行打包  
                 //BuildPipeline.BuildAssetBundles(outputPath, options, buildTarget);
-                BuildPipeline.BuildAssetBundles(outputPath, abbLists.ToArray(), options, buildTarget);
+                // uint crc = 0;
+                // BuildPipeline.GetCRCForAssetBundle(pack.packageName, out crc);
+                // Debug.Log("Crc:" + crc);
+                AssetBundleManifest oldManifest = null;
+                if (File.Exists(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.instance.BundleSaveDirName)))
+                {
+                    AssetBundle oldManifestBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.instance.BundleSaveDirName));
+                    oldManifest = oldManifestBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                }
+                AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(GetOutPath(buildTarget), abbLists.ToArray(), options, buildTarget);
+                if (oldManifest != null)
+                {
+                    foreach (var asset in manifest.GetAllAssetBundles())
+                    {
+                        if (!oldManifest.GetAssetBundleHash(asset).Equals(manifest.GetAssetBundleHash(asset)))
+                        {
+                            CreateHashCheckTable(asset, oldManifest.GetAssetBundleHash(asset).ToString(), manifest.GetAssetBundleHash(asset).ToString(), buildTarget);
+                        }
+                    }
+                }
+                Move2Project(buildTarget);
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
+                AssetDatabase.Refresh();
             }
         }
 
@@ -93,24 +113,36 @@ namespace TF.AssetEditor
             return packs;
         }
 
-        static void CreateABConfig(Dictionary<string, ABPackage> packsDic)
+        // static void CreateABConfig(Dictionary<string, ABPackage> packsDic)
+        // {
+        //     AssetSystem.AssetConfig assetCfg = new AssetSystem.AssetConfig();
+        //     foreach (var pack in packsDic.Values)
+        //     {
+        //         string options = string.Join("", pack.options);
+        //         assetCfg.packInfos.Add(pack.packageName, options);
+        //         foreach (var path in pack.assets)
+        //         {
+        //             assetCfg.assetMaps.Add(path, pack.packageName);
+        //         }
+        //     }
+        //     FileStream fs = new FileStream(GetOutPath() + "/AssetBundleConf.txt", FileMode.Create);
+        //     StreamWriter sw = new StreamWriter(fs);
+        //     sw.Write(JsonUtility.ToJson(assetCfg));
+        //     sw.Flush();
+        //     sw.Close();
+        //     fs.Close();
+        // }
+
+        static void CreateHashCheckTable(string package, string oldHash, string newHash, BuildTarget buildTarget)
         {
-            AssetSystem.AssetConfig assetCfg = new AssetSystem.AssetConfig();
-            foreach (var pack in packsDic.Values)
+            using (StreamWriter sw = new StreamWriter(GetOutPath(buildTarget) + "/HashCheck.cfg", true))
             {
-                string options = string.Join("", pack.options);
-                assetCfg.packInfos.Add(pack.packageName, options);
-                foreach (var path in pack.assets)
-                {
-                    assetCfg.assetMaps.Add(path, pack.packageName);
-                }
+                string command = string.Format("{0}:{1}>{2}", package, oldHash, newHash);
+                sw.WriteLine(command);
+                Debug.Log(command);
+                sw.Flush();
+                sw.Close();
             }
-            FileStream fs = new FileStream(outputPath + "/AssetBundleConf.txt", FileMode.Create);
-            StreamWriter sw = new StreamWriter(fs);
-            sw.Write(JsonUtility.ToJson(assetCfg));
-            sw.Flush();
-            sw.Close();
-            fs.Close();
         }
 
         static void CreateABPackByRule(string assetPath, Dictionary<string, ABPackage> packs)
@@ -137,6 +169,39 @@ namespace TF.AssetEditor
                     }
                 }
             }
+        }
+
+        static string GetOutPath(BuildTarget buildTarget)
+        {
+            return string.Format("{0}/../{1}_AB/{2}", Application.dataPath, buildTarget.ToString(), AssetBundlePathResolver.instance.BundleSaveDirName);
+        }
+
+        static void Move2Project(BuildTarget buildTarget)
+        {
+            CopyBundle(GetOutPath(buildTarget), string.Format("{0}/StreamingAssets", Application.dataPath), true);
+            //bundle移动到streaming内 跟随主体打包
+            //文件的复制粘贴操作即可
+        }
+
+        static void Move2Package()
+        {
+            //bundle做增量包
+        }
+
+        static void CopyBundle(string srcdir, string dstdir, bool overwrite)
+        {
+            string todir = Path.Combine(dstdir, Path.GetFileName(srcdir));
+            if (!Directory.Exists(todir))
+                Directory.CreateDirectory(todir);
+            foreach (var s in Directory.GetFiles(srcdir))
+            {
+                if (!s.EndsWith(".meta") && !s.EndsWith(".manifest"))
+                {
+                    File.Copy(s, Path.Combine(todir, Path.GetFileName(s)), overwrite);
+                }
+            }
+            foreach (var s in Directory.GetDirectories(srcdir))
+                CopyBundle(s, todir, overwrite);
         }
 
     }

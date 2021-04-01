@@ -2,26 +2,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 using Object = UnityEngine.Object;
-
+using TF.AssetSystem;
 internal class BundleLoader : IAssetLoader
 {
-    public void Destory()
-    {
-        throw new NotImplementedException();
-    }
-
-    public string GetPackageName(string path)
-    {
-        throw new NotImplementedException();
-    }
-
+    private string root;
+    public static AssetBundleManifest allManifest;
     public void Initialize(string root)
     {
-        throw new NotImplementedException();
+        this.root = root;
+        AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.BundleSaveDirName));
+        allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+        foreach (var item in allManifest.GetAllAssetBundles())
+        {
+            Debug.Log("init bundle:" + item);
+        }
     }
 
-    public bool IsPackageCreated(string path)
+    private bool IsPackageCreated(string path)
     {
         throw new NotImplementedException();
     }
@@ -60,4 +59,15 @@ internal class BundleLoader : IAssetLoader
     {
         throw new NotImplementedException();
     }
+
+    public void Destory()
+    {
+        throw new NotImplementedException();
+    }
+
+    private string GetPackageName(string path)
+    {
+        throw new NotImplementedException();
+    }
+
 }

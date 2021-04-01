@@ -1,18 +1,29 @@
 ﻿using System.IO;
 using UnityEngine;
 
-namespace TF.AssetEditor
+namespace TF.AssetSystem
 {
     /// <summary>
     /// AB 打包及运行时路径解决器
     /// </summary>
     public class AssetBundlePathResolver
     {
-        public static AssetBundlePathResolver instance;
+        private static AssetBundlePathResolver m_instance;
+        public static AssetBundlePathResolver instance
+        {
+            get
+            {
+                if (m_instance == null)
+                {
+                    m_instance = new AssetBundlePathResolver();
+                }
+                return m_instance;
+            }
+        }
 
         public AssetBundlePathResolver()
         {
-            instance = this;
+            m_instance = this;
         }
 
         /// <summary>
@@ -55,7 +66,7 @@ namespace TF.AssetEditor
         /// <param name="path"></param>
         /// <param name="forWWW"></param>
         /// <returns></returns>
-        public virtual string GetBundleSourceFile(string path, bool forWWW = true)
+        public virtual string GetBundleSourceFile(string path = "", bool forWWW = false)
         {
             string filePath = null;
 #if UNITY_EDITOR
@@ -73,10 +84,26 @@ namespace TF.AssetEditor
                 filePath = string.Format("file://{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
             else
                 filePath = string.Format("{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
-#else
-            throw new System.NotImplementedException();
 #endif
             return filePath;
+        }
+
+        public virtual string GetBundlePersistentFile(string path = "", bool forWWW = false)
+        {
+            return string.Format("{0}/{1}/{2}", Application.persistentDataPath, BundleSaveDirName, path);
+        }
+
+
+        /// <summary>
+        /// 获取 AB 运行时文件路径  优先寻找Persistent目录下
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="forWWW"></param>
+        /// <returns></returns>
+        public virtual string GetBundleFileRuntime(string path = "", bool forWWW = false)
+        {
+            string PerPath = GetBundlePersistentFile(path, forWWW);
+            return File.Exists(PerPath) ? PerPath : GetBundleSourceFile(path, forWWW);
         }
 
         /// <summary>
@@ -87,7 +114,7 @@ namespace TF.AssetEditor
         DirectoryInfo cacheDir;
 
         /// <summary>
-        /// 用于缓存AB的目录，要求可写
+        /// 用于缓存AB的目录，要求可读写
         /// </summary>
         public virtual string BundleCacheDir
         {
@@ -98,7 +125,7 @@ namespace TF.AssetEditor
 #if UNITY_EDITOR
                     string dir = string.Format("{0}/{1}", Application.streamingAssetsPath, BundleSaveDirName);
 #else
-					string dir = string.Format("{0}/AssetBundles", Application.persistentDataPath);
+					string dir = string.Format("{0}/{1}", Application.persistentDataPath, BundleSaveDirName);
 #endif
                     cacheDir = new DirectoryInfo(dir);
                     if (!cacheDir.Exists)

@@ -2,13 +2,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
 {
-    // Resource为虚拟包概念 故很多接口无需实现
+    // AssetDataBase为虚拟包概念
     private string packagePath;
     private Dictionary<string, Object> assetMapping = new Dictionary<string, Object>();
     private HashSet<string> asyncLoading = new HashSet<string>();
@@ -30,8 +32,8 @@ public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
         Object targer;
         if (!assetMapping.TryGetValue(path, out targer))
         {
-            Debug.Log(path);
-            targer = AssetDatabase.LoadAssetAtPath<Object>(path);
+            GetAssetSuffix(packagePath, path);
+            targer = AssetDatabase.LoadAssetAtPath<Object>(GetAssetSuffix(packagePath, path));
             assetMapping.Add(path, targer);
         }
         return targer;
@@ -127,9 +129,20 @@ public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
         UnloadAll();
     }
 
-    private string GetAssetPath(string assetName)
+    private string GetAssetSuffix(string packagePath, string assetPath)
     {
-        return string.Format("{0}/{1}", packagePath, assetName);
+        var files = Directory.GetFiles(packagePath.Replace("Assets", Application.dataPath), Path.GetFileName(assetPath) + ".*");
+        if (files != null)
+        {
+            string suffixPath = assetPath + "." + Path.GetFileName(files.Where(s => !s.EndsWith(".meta")).First()).Split('.')[1];
+            return suffixPath;
+        }
+        else
+        {
+            return assetPath;
+        }
+
     }
+
 }
 #endif

@@ -15,6 +15,4 @@ internal interface IAssetLoader
     void Unload(string path);
     void Unload(Object obj);
     void UnloadAll(string packagePath);
-    bool IsPackageCreated(string path);
-    string GetPackageName(string path);
 }
