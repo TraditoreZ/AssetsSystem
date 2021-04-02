@@ -8,8 +8,9 @@ public class GameMain : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetBundle);
-        // AssetSystemCore.Instance.Initialize("Bundles", LoadType.AssetBundle);
+        //AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetBundle);
+        //AssetSystemCore.Instance.Initialize("", LoadType.Resource);
+        AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetDatabase);
     }
 
     // Update is called once per frame

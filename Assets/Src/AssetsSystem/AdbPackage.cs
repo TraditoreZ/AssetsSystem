@@ -8,38 +8,25 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
+public class AdbPackage : BaseAssetPackage<AdbPackage>
 {
     // AssetDataBase为虚拟包概念
-    private string packagePath;
-    private Dictionary<string, Object> assetMapping = new Dictionary<string, Object>();
     private HashSet<string> asyncLoading = new HashSet<string>();
     private Dictionary<string, HashSet<Action<Object>>> singleCallBackDic = new Dictionary<string, HashSet<Action<Object>>>();
 
-
-    public bool IsLoaded(string path)
-    {
-        return assetMapping.ContainsKey(path);
-    }
-
-    public int LoadCount()
-    {
-        return assetMapping.Count;
-    }
-
-    public Object Load(string path)
+    public override Object Load(string path)
     {
         Object targer;
         if (!assetMapping.TryGetValue(path, out targer))
         {
-            GetAssetSuffix(packagePath, path);
+            Debug.Log(GetAssetSuffix(packagePath, path));
             targer = AssetDatabase.LoadAssetAtPath<Object>(GetAssetSuffix(packagePath, path));
             assetMapping.Add(path, targer);
         }
         return targer;
     }
 
-    public Object[] LoadAll()
+    public override Object[] LoadAll()
     {
         Object[] assets = AssetDatabase.LoadAllAssetsAtPath(packagePath);
         foreach (Object asset in assets)
@@ -53,49 +40,42 @@ public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
         return assets;
     }
 
-    public void LoadAsync(string path, Action<Object> callback)
+    public override void LoadAsync(string path, Action<Object> callback)
     {
         AssetSystemCore.Instance.StartCoroutine(IELoadAsync(path, callback));
     }
 
-
     private IEnumerator IELoadAsync(string path, Action<Object> callback)
     {
-        // 模拟延迟
+        // Editor下模拟延迟
         yield return new WaitForSeconds(AssetSystemCore.Instance.SimulateIODelay ? UnityEngine.Random.Range(0, 1f) : 0);
         callback?.Invoke(Load(path));
     }
 
-
-    public void LoadAllAsync(Action<Object[]> callback)
+    public override void LoadAllAsync(Action<Object[]> callback)
     {
         AssetSystemCore.Instance.StartCoroutine(IELoadAllAsync(callback));
     }
 
     private IEnumerator IELoadAllAsync(Action<Object[]> callback)
     {
-        // 模拟延迟
+        // Editor下模拟延迟
         yield return new WaitForSeconds(AssetSystemCore.Instance.SimulateIODelay ? UnityEngine.Random.Range(0, 1f) : 0);
         callback?.Invoke(LoadAll());
     }
 
-    public void LoadPackage(string packagePath, bool async)
+    public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
     {
-        this.packagePath = packagePath;
-        Debug.Log("[Asset Package] LoadPackage:" + packagePath);
+        base.LoadPackage(packagePath, async, callBack);
+        callBack?.Invoke(this);
     }
 
-    public bool PackageLoaded()
+    public override bool PackageLoaded()
     {
         return true;
     }
 
-    public string PackagePath()
-    {
-        return packagePath;
-    }
-
-    public void Unload(string path)
+    public override void Unload(string path)
     {
         Object targer;
         if (assetMapping.TryGetValue(path, out targer))
@@ -105,7 +85,7 @@ public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
         }
     }
 
-    public void Unload(Object obj)
+    public override void Unload(Object obj)
     {
         if (obj.GetType() != typeof(GameObject))
         {
@@ -117,16 +97,10 @@ public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
         }
     }
 
-    public void UnloadAll()
+    public override void UnloadAll()
     {
         assetMapping.Clear();
         Resources.UnloadUnusedAssets();
-    }
-
-    public void UnloadPackage()
-    {
-        Debug.Log("[Asset Package] UnloadPackage:" + packagePath);
-        UnloadAll();
     }
 
     private string GetAssetSuffix(string packagePath, string assetPath)
@@ -141,7 +115,6 @@ public class AdbPackage : ObjectPool<AdbPackage>, IAssetPackage
         {
             return assetPath;
         }
-
     }
 
 }

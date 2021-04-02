@@ -5,14 +5,14 @@ using UnityEngine;
 using System.IO;
 using Object = UnityEngine.Object;
 using TF.AssetSystem;
-internal class BundleLoader : IAssetLoader
+internal class BundleLoader : BaseAssetLoader
 {
-    private string root;
     public static AssetBundleManifest allManifest;
-    public void Initialize(string root)
+
+    public override void Initialize(string root)
     {
-        this.root = root;
-        AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.BundleSaveDirName));
+        base.Initialize(root);
+        AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
         allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
         foreach (var item in allManifest.GetAllAssetBundles())
         {
@@ -20,54 +20,55 @@ internal class BundleLoader : IAssetLoader
         }
     }
 
-    private bool IsPackageCreated(string path)
+
+
+    public override Object Load(string path)
     {
         throw new NotImplementedException();
     }
 
-    public Object Load(string path)
+    public override Object[] LoadAll(string packagePath)
     {
         throw new NotImplementedException();
     }
 
-    public Object[] LoadAll(string packagePath)
+    public override void LoadAllAsync(string path, Action<Object[]> callback)
     {
         throw new NotImplementedException();
     }
 
-    public void LoadAllAsync(string path, Action<Object[]> callback)
+    public override void LoadAsync(string path, Action<Object> callback)
     {
         throw new NotImplementedException();
     }
 
-    public void LoadAsync(string path, Action<Object> callback)
+    public override void Unload(string path)
     {
         throw new NotImplementedException();
     }
 
-    public void Unload(string path)
+    public override void Unload(Object obj)
     {
         throw new NotImplementedException();
     }
 
-    public void Unload(Object obj)
+    public override void UnloadAll(string packagePath)
     {
         throw new NotImplementedException();
     }
 
-    public void UnloadAll(string packagePath)
+    public override void Destory()
+    {
+        base.Destory();
+    }
+
+    protected override string GetPackageName(string path)
     {
         throw new NotImplementedException();
     }
 
-    public void Destory()
-    {
-        throw new NotImplementedException();
-    }
+    protected override IAssetPackage CreatePackage() { return BundlePackage.CreateObject(); }
 
-    private string GetPackageName(string path)
-    {
-        throw new NotImplementedException();
-    }
+    protected override void DestoryPackage(IAssetPackage package) { BundlePackage.ReclaimObject(package as BundlePackage); }
 
 }

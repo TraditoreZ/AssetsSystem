@@ -38,10 +38,14 @@ namespace TF.AssetEditor
             BuildAssetBundle(BuildTarget.iOS);
         }
 
-        public static void BuildAssetBundle(BuildTarget buildTarget = BuildTarget.StandaloneWindows64)
+        public static void BuildAssetBundle(BuildTarget buildTarget = BuildTarget.StandaloneWindows64, bool increment = false)
         {
             try
             {
+                if (!increment)
+                {
+                    ClearBundles(GetOutPath(buildTarget));
+                }
                 if (!System.IO.Directory.Exists(GetOutPath(buildTarget)))
                 {
                     System.IO.Directory.CreateDirectory(GetOutPath(buildTarget));
@@ -63,7 +67,7 @@ namespace TF.AssetEditor
                 {
                     EditorUtility.DisplayCancelableProgressBar("Create AssetPackage", string.Format("{0}     {1}:mb", pack.packageName, pack.size_MB), (float)index++ / max);
                     AssetBundleBuild abb = new AssetBundleBuild();
-                    abb.assetBundleName = pack.packageName;
+                    abb.assetBundleName = pack.packageName + AssetBundlePathResolver.instance.BundleSuffix;
                     abb.assetNames = pack.assets.ToArray();
                     abbLists.Add(abb);
                 }
@@ -133,6 +137,7 @@ namespace TF.AssetEditor
         //     fs.Close();
         // }
 
+        // hash表单 记录bundle的所有修改 可用于任意时刻切曾量包
         static void CreateHashCheckTable(string package, string oldHash, string newHash, BuildTarget buildTarget)
         {
             using (StreamWriter sw = new StreamWriter(GetOutPath(buildTarget) + "/HashCheck.cfg", true))
@@ -173,12 +178,14 @@ namespace TF.AssetEditor
 
         static string GetOutPath(BuildTarget buildTarget)
         {
-            return string.Format("{0}/../{1}_AB/{2}", Application.dataPath, buildTarget.ToString(), AssetBundlePathResolver.instance.BundleSaveDirName);
+            return AssetBundlePathResolver.BundleOutputPath(buildTarget);
         }
 
         static void Move2Project(BuildTarget buildTarget)
         {
-            CopyBundle(GetOutPath(buildTarget), string.Format("{0}/StreamingAssets", Application.dataPath), true);
+            string targer = string.Format("{0}/StreamingAssets/{1}", Application.dataPath, AssetBundlePathResolver.instance.BundleSaveDirName);
+            ClearBundles(targer);
+            CopyBundle(GetOutPath(buildTarget), targer, true);
             //bundle移动到streaming内 跟随主体打包
             //文件的复制粘贴操作即可
         }
@@ -204,5 +211,14 @@ namespace TF.AssetEditor
                 CopyBundle(s, todir, overwrite);
         }
 
+
+        static void ClearBundles(string dir)
+        {
+            if (Directory.Exists(dir))
+            {
+                DirectoryInfo di = new DirectoryInfo(dir);
+                di.Delete(true);
+            }
+        }
     }
 }

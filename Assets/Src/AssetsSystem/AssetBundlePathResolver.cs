@@ -30,33 +30,15 @@ namespace TF.AssetSystem
         /// AB 保存的路径相对于 Assets/StreamingAssets 的名字
         /// </summary>
         public virtual string BundleSaveDirName { get { return "AssetBundles"; } }
+        /// <summary>
+        /// 取AB后缀
+        /// </summary>
+        public virtual string BundleSuffix { get { return ".ab"; } }
 
 #if UNITY_EDITOR
-        /// <summary>
-        /// AB 保存的路径
-        /// </summary>
-        public string BundleSavePath { get { return "Assets/StreamingAssets/" + BundleSaveDirName; } }
-        /// <summary>
-        /// AB打包的原文件HashCode要保存到的路径，下次可供增量打包
-        /// </summary>
-        public virtual string HashCacheSaveFile { get { return "Assets/AssetBundles/cache.txt"; } }
-        /// <summary>
-        /// 在编辑器模型下将 abName 转为 Assets/... 路径
-        /// 这样就可以不用打包直接用了
-        /// </summary>
-        /// <param name="abName"></param>
-        /// <returns></returns>
-        public virtual string GetEditorModePath(string abName)
+        public static string BundleOutputPath(UnityEditor.BuildTarget buildTarget)
         {
-            //将 Assets.AA.BB.prefab 转为 Assets/AA/BB.prefab
-            abName = abName.Replace(".", "/");
-            int last = abName.LastIndexOf("/");
-
-            if (last == -1)
-                return abName;
-
-            string path = string.Format("{0}.{1}", abName.Substring(0, last), abName.Substring(last + 1));
-            return path;
+            return string.Format("{0}/../{1}/{2}", Application.dataPath, AssetBundlePathResolver.instance.BundleSaveDirName, buildTarget.ToString());
         }
 #endif
 
@@ -71,26 +53,26 @@ namespace TF.AssetSystem
             string filePath = null;
 #if UNITY_EDITOR
             if (forWWW)
-                filePath = string.Format("file://{0}/StreamingAssets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+                filePath = string.Format("file://{0}/StreamingAssets/{1}/{2}/{3}", Application.dataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
             else
-                filePath = string.Format("{0}/StreamingAssets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+                filePath = string.Format("{0}/StreamingAssets/{1}/{2}/{3}", Application.dataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
 #elif UNITY_ANDROID
             if (forWWW)
-                filePath = string.Format("jar:file://{0}!/assets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+                filePath = string.Format("jar:file://{0}!/assets/{1}/{2}/{3}", Application.dataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
             else
-                filePath = string.Format("{0}!assets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+                filePath = string.Format("{0}!assets/{1}/{2}/{3}", Application.dataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
 #elif UNITY_IOS
             if (forWWW)
-                filePath = string.Format("file://{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+                filePath = string.Format("file://{0}/Raw/{1}/{2}/{3}", Application.dataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
             else
-                filePath = string.Format("{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+                filePath = string.Format("{0}/Raw/{1}/{2}/{3}", Application.dataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
 #endif
             return filePath;
         }
 
         public virtual string GetBundlePersistentFile(string path = "", bool forWWW = false)
         {
-            return string.Format("{0}/{1}/{2}", Application.persistentDataPath, BundleSaveDirName, path);
+            return string.Format("{0}/{1}/{2}/{3}", Application.persistentDataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
         }
 
 
@@ -104,6 +86,19 @@ namespace TF.AssetSystem
         {
             string PerPath = GetBundlePersistentFile(path, forWWW);
             return File.Exists(PerPath) ? PerPath : GetBundleSourceFile(path, forWWW);
+        }
+
+        public virtual string GetBundlePlatformRuntime()
+        {
+            string path = string.Empty;
+#if UNITY_EDITOR
+            path = "StandaloneWindows64";
+#elif UNITY_ANDROID
+            path = "Android";
+#elif UNITY_IOS
+            path = "iOS";
+#endif
+            return path;
         }
 
         /// <summary>

@@ -6,58 +6,55 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using System.IO;
 
-public class AdbLoader : IAssetLoader
+public class AdbLoader : BaseAssetLoader
 {
     // AssetDatabase用于编辑器预览
-    private Dictionary<string, IAssetPackage> packMapping;
-    private string root;
-    public void Initialize(string root)
+    public override void Initialize(string root)
     {
-        this.root = root;
-        packMapping = new Dictionary<string, IAssetPackage>();
+        base.Initialize(root);
     }
 
-    public void Destory()
+    public override void Destory()
     {
-
+        base.Destory();
     }
 
-    public Object Load(string path)
+    public override Object Load(string path)
     {
         path = CombinePath(root, path);
         string packagePath = GetPackageName(path);
-        return LoadPackage(packagePath, false).Load(path);
+        return LoadPackage(packagePath).Load(path);
     }
 
-    public Object[] LoadAll(string path)
+    public override Object[] LoadAll(string path)
     {
         path = CombinePath(root, path);
         string packagePath = GetPackageName(path);
-        return LoadPackage(packagePath, false).LoadAll();
+        return LoadPackage(packagePath).LoadAll();
     }
 
 
-    public void LoadAsync(string path, Action<Object> callback)
+    public override void LoadAsync(string path, Action<Object> callback)
     {
         path = CombinePath(root, path);
         string packagePath = GetPackageName(path);
-        LoadPackage(packagePath, true).LoadAsync(path, callback);
+        LoadPackage(packagePath).LoadAsync(path, callback);
     }
 
-    public void LoadAllAsync(string path, Action<Object[]> callback)
+    public override void LoadAllAsync(string path, Action<Object[]> callback)
     {
         path = CombinePath(root, path);
         string packagePath = GetPackageName(path);
-        LoadPackage(packagePath, true).LoadAllAsync(callback);
+        LoadPackage(packagePath).LoadAllAsync(callback);
     }
 
-    public void Unload(string path)
+    public override void Unload(string path)
     {
         path = CombinePath(root, path);
         string packagePath = GetPackageName(path);
         if (packMapping.ContainsKey(packagePath))
         {
-            IAssetPackage package = LoadPackage(packagePath, false);
+            IAssetPackage package = LoadPackage(packagePath);
             package.Unload(path);
             if (package.LoadCount() == 0)
             {
@@ -66,10 +63,9 @@ public class AdbLoader : IAssetLoader
         }
     }
 
-    public void Unload(Object obj)
+    public override void Unload(Object obj)
     {
         IAssetPackage package = null;
-        // TODO  如性能开销过高再cash优化
         foreach (var tempPack in packMapping.Values)
         {
             if (tempPack.IsLoaded(obj.name))
@@ -87,44 +83,24 @@ public class AdbLoader : IAssetLoader
         }
     }
 
-    public void UnloadAll(string packagePath)
+    public override void UnloadAll(string packagePath)
     {
         packagePath = CombinePath(root, packagePath);
         if (packMapping.ContainsKey(packagePath))
         {
-            LoadPackage(packagePath, false).UnloadAll();
+            LoadPackage(packagePath).UnloadAll();
             UnloadPackage(packagePath);
         }
     }
 
-    private IAssetPackage LoadPackage(string packagePath, bool asyncLoaded)
-    {
-        IAssetPackage package;
-        if (!packMapping.TryGetValue(packagePath, out package))
-        {
-            package = AdbPackage.CreateObject();
-            packMapping.Add(packagePath, package);
-            package.LoadPackage(packagePath, asyncLoaded);
-        }
-        return package;
-    }
-
-    private void UnloadPackage(string packagePath)
-    {
-        IAssetPackage package;
-        if (packMapping.TryGetValue(packagePath, out package))
-        {
-            packMapping.Remove(packagePath);
-            package.UnloadPackage();
-            AdbPackage.ReclaimObject(package as AdbPackage);
-        }
-    }
-
-    private string GetPackageName(string path)
+    protected override string GetPackageName(string path)
     {
         return path.Substring(0, path.LastIndexOf('/'));
     }
 
+    protected override IAssetPackage CreatePackage() { return AdbPackage.CreateObject(); }
+
+    protected override void DestoryPackage(IAssetPackage package) { AdbPackage.ReclaimObject(package as AdbPackage); }
 
     private string CombinePath(string p1, string p2)
     {

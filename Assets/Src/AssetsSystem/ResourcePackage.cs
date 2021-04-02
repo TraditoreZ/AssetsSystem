@@ -3,26 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
-public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
+public class ResourcePackage : BaseAssetPackage<ResourcePackage>
 {
     // Resource为虚拟包概念
-    private string packagePath;
-    private Dictionary<string, Object> assetMapping = new Dictionary<string, Object>();
     private HashSet<string> asyncLoading = new HashSet<string>();
     private Dictionary<string, HashSet<Action<Object>>> singleCallBackDic = new Dictionary<string, HashSet<Action<Object>>>();
 
-
-    public bool IsLoaded(string path)
-    {
-        return assetMapping.ContainsKey(path);
-    }
-
-    public int LoadCount()
-    {
-        return assetMapping.Count;
-    }
-
-    public Object Load(string path)
+    public override Object Load(string path)
     {
         Object targer;
         if (!assetMapping.TryGetValue(path, out targer))
@@ -33,7 +20,7 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
         return targer;
     }
 
-    public Object[] LoadAll()
+    public override Object[] LoadAll()
     {
         Object[] assets = Resources.LoadAll(packagePath);
         foreach (Object asset in assets)
@@ -47,7 +34,7 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
         return assets;
     }
 
-    public void LoadAsync(string path, Action<Object> callback)
+    public override void LoadAsync(string path, Action<Object> callback)
     {
         Object targer;
         if (assetMapping.TryGetValue(path, out targer))
@@ -87,28 +74,24 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
         singleCallBackDic[path].Clear();
     }
 
-    public void LoadAllAsync(Action<Object[]> callback)
+    public override void LoadAllAsync(Action<Object[]> callback)
     {
         callback?.Invoke(LoadAll());
     }
 
-    public void LoadPackage(string packagePath, bool async)
+    public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
     {
         this.packagePath = packagePath;
         Debug.Log("[Asset Package] LoadPackage:" + packagePath);
+        callBack?.Invoke(this);
     }
 
-    public bool PackageLoaded()
+    public override bool PackageLoaded()
     {
         return true;
     }
 
-    public string PackagePath()
-    {
-        return packagePath;
-    }
-
-    public void Unload(string path)
+    public override void Unload(string path)
     {
         Object targer;
         if (assetMapping.TryGetValue(path, out targer))
@@ -118,7 +101,7 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
         }
     }
 
-    public void Unload(Object obj)
+    public override void Unload(Object obj)
     {
         if (obj.GetType() != typeof(GameObject))
         {
@@ -130,16 +113,10 @@ public class ResourcePackage : ObjectPool<ResourcePackage>, IAssetPackage
         }
     }
 
-    public void UnloadAll()
+    public override void UnloadAll()
     {
         assetMapping.Clear();
         Resources.UnloadUnusedAssets();
-    }
-
-    public void UnloadPackage()
-    {
-        Debug.Log("[Asset Package] UnloadPackage:" + packagePath);
-        UnloadAll();
     }
 
     private string GetAssetPath(string assetName)
