@@ -22,9 +22,9 @@ public class ResourceLoader : BaseAssetLoader
         return LoadPackage(packagePath).Load(path);
     }
 
-    public override Object[] LoadAll(string path)
+    public override Object[] LoadAll(string packagePath)
     {
-        return LoadPackage(path).LoadAll();
+        return LoadPackage(packagePath).LoadAll();
     }
 
 
@@ -34,9 +34,9 @@ public class ResourceLoader : BaseAssetLoader
         LoadPackage(packagePath).LoadAsync(path, callback);
     }
 
-    public override void LoadAllAsync(string path, Action<Object[]> callback)
+    public override void LoadAllAsync(string packagePath, Action<Object[]> callback)
     {
-        LoadPackage(path).LoadAllAsync(callback);
+        LoadPackage(packagePath).LoadAllAsync(callback);
     }
 
     public override void Unload(string path)

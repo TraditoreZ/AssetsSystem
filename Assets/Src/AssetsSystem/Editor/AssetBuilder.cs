@@ -67,11 +67,20 @@ namespace TF.AssetEditor
                 {
                     EditorUtility.DisplayCancelableProgressBar("Create AssetPackage", string.Format("{0}     {1}:mb", pack.packageName, pack.size_MB), (float)index++ / max);
                     AssetBundleBuild abb = new AssetBundleBuild();
-                    abb.assetBundleName = pack.packageName + AssetBundlePathResolver.instance.BundleSuffix;
+                    abb.assetBundleName = pack.packageName;
                     abb.assetNames = pack.assets.ToArray();
                     abbLists.Add(abb);
                 }
+                if (File.Exists(configPath.EndsWith(".txt") ? configPath : configPath + ".txt"))
+                {
 
+                    File.Copy(configPath.EndsWith(".txt") ? configPath : configPath + ".txt", Path.Combine(GetOutPath(buildTarget), "bundleRule.txt"), true);
+                }
+                else
+                {
+                    Debug.LogError("Not Find " + configPath);
+                    throw new System.Exception();
+                }
                 // 如果运行时采用正则表达式 那么可以不需要这张表了
                 //CreateABConfig(packsDic);
                 //根据BuildSetting里面所激活的平台进行打包 设置过AssetBundleName的都会进行打包  

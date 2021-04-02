@@ -8,9 +8,9 @@ public class GameMain : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        //AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetBundle);
+        AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetBundle);
         //AssetSystemCore.Instance.Initialize("", LoadType.Resource);
-        AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetDatabase);
+        //AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetDatabase);
     }
 
     // Update is called once per frame
@@ -55,7 +55,7 @@ public class GameMain : MonoBehaviour
                 Destroy(item);
             }
             objs.Clear();
-            AssetSystemCore.Instance.UnloadAll("Actor/2001_player_wumingdj");
+            AssetSystemCore.Instance.UnloadAll("2001_player_wumingdj_prefab");
         }
 
 

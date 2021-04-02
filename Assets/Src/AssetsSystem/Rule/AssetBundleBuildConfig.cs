@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using UnityEditorInternal;
 using UnityEngine;
 
-namespace TF.AssetEditor
+namespace TF.AssetSystem
 {
     public class AssetBundleBuildConfig
     {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TF.AssetEditor
+namespace TF.AssetSystem
 {
     public class AssetBundleRule
     {

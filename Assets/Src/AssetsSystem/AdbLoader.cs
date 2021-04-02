@@ -26,10 +26,9 @@ public class AdbLoader : BaseAssetLoader
         return LoadPackage(packagePath).Load(path);
     }
 
-    public override Object[] LoadAll(string path)
+    public override Object[] LoadAll(string packagePath)
     {
-        path = CombinePath(root, path);
-        string packagePath = GetPackageName(path);
+        packagePath = CombinePath(root, packagePath);
         return LoadPackage(packagePath).LoadAll();
     }
 
@@ -41,10 +40,9 @@ public class AdbLoader : BaseAssetLoader
         LoadPackage(packagePath).LoadAsync(path, callback);
     }
 
-    public override void LoadAllAsync(string path, Action<Object[]> callback)
+    public override void LoadAllAsync(string packagePath, Action<Object[]> callback)
     {
-        path = CombinePath(root, path);
-        string packagePath = GetPackageName(path);
+        packagePath = CombinePath(root, packagePath);
         LoadPackage(packagePath).LoadAllAsync(callback);
     }
 

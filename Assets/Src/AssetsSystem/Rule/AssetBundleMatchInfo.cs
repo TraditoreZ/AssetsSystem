@@ -1,4 +1,4 @@
-namespace TF.AssetEditor
+namespace TF.AssetSystem
 {
     public class AssetBundleMatchInfo
     {
