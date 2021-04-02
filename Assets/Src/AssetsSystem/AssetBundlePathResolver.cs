@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using UnityEngine;
 
-namespace TF.AssetSystem
+namespace AssetSystem
 {
     /// <summary>
     /// AB 打包及运行时路径解决器

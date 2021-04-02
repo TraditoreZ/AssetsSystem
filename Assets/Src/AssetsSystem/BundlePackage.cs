@@ -1,184 +1,187 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using TF.AssetSystem;
+using AssetSystem;
 using UnityEngine;
 using Object = UnityEngine.Object;
-public class BundlePackage : BaseAssetPackage<BundlePackage>
+namespace AssetSystem
 {
-    private AssetBundle m_AssetBundle;
-    private HashSet<string> _assetRef = new HashSet<string>();
-    private HashSet<string> _packageRef = new HashSet<string>();
-    private Dictionary<string, Queue<Action<Object>>> asyncCallLists = new Dictionary<string, Queue<Action<Object>>>();
-    private Queue<Action<Object[]>> asyncAllCallLists = new Queue<Action<Object[]>>();
-
-    public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
+    public class BundlePackage : BaseAssetPackage<BundlePackage>
     {
-        base.LoadPackage(packagePath, async, callBack);
-        if (async)
+        private AssetBundle m_AssetBundle;
+        private HashSet<string> _assetRef = new HashSet<string>();
+        private HashSet<string> _packageRef = new HashSet<string>();
+        private Dictionary<string, Queue<Action<Object>>> asyncCallLists = new Dictionary<string, Queue<Action<Object>>>();
+        private Queue<Action<Object[]>> asyncAllCallLists = new Queue<Action<Object[]>>();
+
+        public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
-            AssetBundle.LoadFromFileAsync(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false)).completed += OnAssetBundleLoaded;
-            packageLoadedCalls.Enqueue(callBack);
+            base.LoadPackage(packagePath, async, callBack);
+            if (async)
+            {
+                AssetBundle.LoadFromFileAsync(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false)).completed += OnAssetBundleLoaded;
+                packageLoadedCalls.Enqueue(callBack);
+            }
+            else
+            {
+                m_AssetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false));
+            }
         }
-        else
+
+        private void OnAssetBundleLoaded(AsyncOperation obj)
         {
-            m_AssetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false));
+            AssetBundleCreateRequest req = obj as AssetBundleCreateRequest;
+            req.completed -= OnAssetBundleLoaded;
+            if (m_AssetBundle == null)
+            {
+                m_AssetBundle = req.assetBundle;
+            }
+            else
+            {
+                req.assetBundle.Unload(true);
+            }
+            while (packageLoadedCalls.Count > 0)
+            {
+                packageLoadedCalls.Dequeue()?.Invoke(this);
+            }
         }
-    }
 
-    private void OnAssetBundleLoaded(AsyncOperation obj)
-    {
-        AssetBundleCreateRequest req = obj as AssetBundleCreateRequest;
-        req.completed -= OnAssetBundleLoaded;
-        if (m_AssetBundle == null)
+        public override bool PackageLoaded()
         {
-            m_AssetBundle = req.assetBundle;
+            return m_AssetBundle != null;
         }
-        else
+
+        public override Object Load(string path)
         {
-            req.assetBundle.Unload(true);
+            string assetName = GetAssetNameByPath(path);
+            if (!m_AssetBundle.Contains(assetName))
+            {
+                Debug.LogError("AssetBunle Load Error: Not find:" + path);
+                return null;
+            }
+            Object asset = m_AssetBundle.LoadAsset(assetName);
+            _assetRef.Add(assetName);
+            return asset;
         }
-        while (packageLoadedCalls.Count > 0)
+
+
+
+        public override Object[] LoadAll()
         {
-            packageLoadedCalls.Dequeue()?.Invoke(this);
+            Object[] objs = m_AssetBundle.LoadAllAssets();
+            foreach (var obj in objs)
+            {
+                _assetRef.Add(obj.name);
+            }
+            return m_AssetBundle.LoadAllAssets();
         }
-    }
 
-    public override bool PackageLoaded()
-    {
-        return m_AssetBundle != null;
-    }
-
-    public override Object Load(string path)
-    {
-        string assetName = GetAssetNameByPath(path);
-        if (!m_AssetBundle.Contains(assetName))
+        public override void LoadAsync(string path, Action<Object> callback)
         {
-            Debug.LogError("AssetBunle Load Error: Not find:" + path);
-            return null;
+            string assetName = GetAssetNameByPath(path);
+            if (!m_AssetBundle.Contains(assetName))
+            {
+                Debug.LogError("AssetBunle LoadAsync Error: Not find:" + path);
+                callback?.Invoke(null);
+                return;
+            }
+            if (!asyncCallLists.ContainsKey(assetName))
+            {
+                asyncCallLists.Add(assetName, new Queue<Action<Object>>());
+            }
+            if (asyncCallLists[assetName].Count == 0)
+            {
+                m_AssetBundle.LoadAssetAsync(assetName).completed += OnAssetLoaded;
+            }
+            asyncCallLists[assetName].Enqueue(callback);
         }
-        Object asset = m_AssetBundle.LoadAsset(assetName);
-        _assetRef.Add(assetName);
-        return asset;
-    }
 
-
-
-    public override Object[] LoadAll()
-    {
-        Object[] objs = m_AssetBundle.LoadAllAssets();
-        foreach (var obj in objs)
+        private void OnAssetLoaded(AsyncOperation obj)
         {
-            _assetRef.Add(obj.name);
+            AssetBundleRequest req = obj as AssetBundleRequest;
+            req.completed -= OnAssetLoaded;
+            _assetRef.Add(req.asset.name);
+            while (asyncCallLists[req.asset.name].Count > 0)
+            {
+                asyncCallLists[req.asset.name].Dequeue()?.Invoke(req.asset);
+            }
         }
-        return m_AssetBundle.LoadAllAssets();
-    }
 
-    public override void LoadAsync(string path, Action<Object> callback)
-    {
-        string assetName = GetAssetNameByPath(path);
-        if (!m_AssetBundle.Contains(assetName))
+        public override void LoadAllAsync(Action<Object[]> callback)
         {
-            Debug.LogError("AssetBunle LoadAsync Error: Not find:" + path);
-            callback?.Invoke(null);
-            return;
+            if (asyncAllCallLists.Count == 0)
+            {
+                m_AssetBundle.LoadAllAssetsAsync().completed += OnAllAssetLoaded;
+            }
+            asyncAllCallLists.Enqueue(callback);
         }
-        if (!asyncCallLists.ContainsKey(assetName))
+
+        private void OnAllAssetLoaded(AsyncOperation obj)
         {
-            asyncCallLists.Add(assetName, new Queue<Action<Object>>());
+            AssetBundleRequest req = obj as AssetBundleRequest;
+            req.completed -= OnAllAssetLoaded;
+            foreach (var asset in req.allAssets)
+            {
+                _assetRef.Add(asset.name);
+            }
+            while (asyncAllCallLists.Count > 0)
+            {
+                asyncAllCallLists.Dequeue()?.Invoke(req.allAssets);
+            }
         }
-        if (asyncCallLists[assetName].Count == 0)
+
+        public override void Unload(string path)
         {
-            m_AssetBundle.LoadAssetAsync(assetName).completed += OnAssetLoaded;
+            string assetName = GetAssetNameByPath(path);
+            _assetRef.Remove(assetName);
         }
-        asyncCallLists[assetName].Enqueue(callback);
-    }
 
-    private void OnAssetLoaded(AsyncOperation obj)
-    {
-        AssetBundleRequest req = obj as AssetBundleRequest;
-        req.completed -= OnAssetLoaded;
-        _assetRef.Add(req.asset.name);
-        while (asyncCallLists[req.asset.name].Count > 0)
+        public override void Unload(Object obj)
         {
-            asyncCallLists[req.asset.name].Dequeue()?.Invoke(req.asset);
+            if (obj != null)
+            {
+                _assetRef.Remove(obj.name);
+            }
         }
-    }
 
-    public override void LoadAllAsync(Action<Object[]> callback)
-    {
-        if (asyncAllCallLists.Count == 0)
+        public override void UnloadAll()
         {
-            m_AssetBundle.LoadAllAssetsAsync().completed += OnAllAssetLoaded;
+            _assetRef.Clear();
         }
-        asyncAllCallLists.Enqueue(callback);
-    }
 
-    private void OnAllAssetLoaded(AsyncOperation obj)
-    {
-        AssetBundleRequest req = obj as AssetBundleRequest;
-        req.completed -= OnAllAssetLoaded;
-        foreach (var asset in req.allAssets)
+        private string GetAssetNameByPath(string path)
         {
-            _assetRef.Add(asset.name);
+            return System.IO.Path.GetFileName(path);
         }
-        while (asyncAllCallLists.Count > 0)
+
+        //自身是否还持有资源引用或被其他包引用
+        public bool CheckSelfRef()
         {
-            asyncAllCallLists.Dequeue()?.Invoke(req.allAssets);
+            Debug.LogWarning(packagePath + " CheckSelfRef    " + _assetRef.Count + "    " + _packageRef.Count);
+            return (_assetRef.Count > 0 || _packageRef.Count > 0);
         }
-    }
 
-    public override void Unload(string path)
-    {
-        string assetName = GetAssetNameByPath(path);
-        _assetRef.Remove(assetName);
-    }
-
-    public override void Unload(Object obj)
-    {
-        if (obj != null)
+        public bool AddPackageRef(string package)
         {
-            _assetRef.Remove(obj.name);
+            Debug.Log(packagePath + "     AddPackageRef:" + package);
+            return _packageRef.Add(package);
         }
-    }
 
-    public override void UnloadAll()
-    {
-        _assetRef.Clear();
-    }
-
-    private string GetAssetNameByPath(string path)
-    {
-        return System.IO.Path.GetFileName(path);
-    }
-
-    //自身是否还持有资源引用或被其他包引用
-    public bool CheckSelfRef()
-    {
-        Debug.LogWarning(packagePath + " CheckSelfRef    " + _assetRef.Count + "    " + _packageRef.Count);
-        return (_assetRef.Count > 0 || _packageRef.Count > 0);
-    }
-
-    public bool AddPackageRef(string package)
-    {
-        Debug.Log(packagePath + "     AddPackageRef:" + package);
-        return _packageRef.Add(package);
-    }
-
-    public bool RemovePackageRef(string package)
-    {
-        Debug.Log(packagePath + "     RemovePackageRef:" + package);
-        return _packageRef.Remove(package);
-    }
+        public bool RemovePackageRef(string package)
+        {
+            Debug.Log(packagePath + "     RemovePackageRef:" + package);
+            return _packageRef.Remove(package);
+        }
 
 
-    public override void UnloadPackage()
-    {
-        base.UnloadPackage();
-        Debug.LogWarning("Unload AssetBundle:" + packagePath);
-        m_AssetBundle.Unload(true);
-        _packageRef.Clear();
-        _assetRef.Clear();
-        m_AssetBundle = null;
+        public override void UnloadPackage()
+        {
+            base.UnloadPackage();
+            Debug.LogWarning("Unload AssetBundle:" + packagePath);
+            m_AssetBundle.Unload(true);
+            _packageRef.Clear();
+            _assetRef.Clear();
+            m_AssetBundle = null;
+        }
     }
 }

@@ -5,9 +5,9 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
-using TF.AssetSystem;
+using AssetSystem;
 
-namespace TF.AssetEditor
+namespace AssetEditor
 {
     public class AssetBuilder : Editor
     {

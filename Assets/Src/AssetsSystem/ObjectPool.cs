@@ -1,34 +1,34 @@
 ﻿using System.Collections.Generic;
-// namespace TF.AssetSystem
-// {
-public class ObjectPool<T> where T : new()
+namespace AssetSystem
 {
-    public static Stack<T> _unityObjects = new Stack<T>();
-    static T v;
-    public static T CreateObject()
+    public class ObjectPool<T> where T : new()
     {
-        if (_unityObjects.Count > 0)
+        public static Stack<T> _unityObjects = new Stack<T>();
+        static T v;
+        public static T CreateObject()
         {
-            v = _unityObjects.Pop();
-            return v;
+            if (_unityObjects.Count > 0)
+            {
+                v = _unityObjects.Pop();
+                return v;
+            }
+            else
+            {
+                return new T();
+            }
+
         }
-        else
+
+        public static void ReclaimObject(T item)
         {
-            return new T();
+            _unityObjects.Push(item);
+            (item as ObjectPool<T>).Reset();
         }
 
-    }
 
-    public static void ReclaimObject(T item)
-    {
-        _unityObjects.Push(item);
-        (item as ObjectPool<T>).Reset();
-    }
+        public virtual void Reset()
+        {
 
-
-    public virtual void Reset()
-    {
-
+        }
     }
 }
-// }

@@ -1,6 +1,9 @@
-﻿public enum LoadType
+﻿namespace AssetSystem
 {
-    AssetDatabase,
-    AssetBundle,
-    Resource
+    public enum LoadType
+    {
+        AssetDatabase,
+        AssetBundle,
+        Resource
+    }
 }

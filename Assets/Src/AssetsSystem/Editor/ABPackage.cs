@@ -1,8 +1,5 @@
-
-
 using System.Collections.Generic;
-
-namespace TF.AssetEditor
+namespace AssetEditor
 {
     public class ABPackage
     {

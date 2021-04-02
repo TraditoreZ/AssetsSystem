@@ -3,124 +3,127 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
-public class ResourcePackage : BaseAssetPackage<ResourcePackage>
+namespace AssetSystem
 {
-    // Resource为虚拟包概念
-    private HashSet<string> asyncLoading = new HashSet<string>();
-    private Dictionary<string, HashSet<Action<Object>>> singleCallBackDic = new Dictionary<string, HashSet<Action<Object>>>();
-
-    public override Object Load(string path)
+    public class ResourcePackage : BaseAssetPackage<ResourcePackage>
     {
-        Object targer;
-        if (!assetMapping.TryGetValue(path, out targer))
-        {
-            targer = Resources.Load(path);
-            assetMapping.Add(path, targer);
-        }
-        return targer;
-    }
+        // Resource为虚拟包概念
+        private HashSet<string> asyncLoading = new HashSet<string>();
+        private Dictionary<string, HashSet<Action<Object>>> singleCallBackDic = new Dictionary<string, HashSet<Action<Object>>>();
 
-    public override Object[] LoadAll()
-    {
-        Object[] assets = Resources.LoadAll(packagePath);
-        foreach (Object asset in assets)
+        public override Object Load(string path)
         {
-            string path = packagePath + asset.name;
-            if (!assetMapping.ContainsKey(path))
+            Object targer;
+            if (!assetMapping.TryGetValue(path, out targer))
             {
-                assetMapping.Add(path, asset);
+                targer = Resources.Load(path);
+                assetMapping.Add(path, targer);
             }
+            return targer;
         }
-        return assets;
-    }
 
-    public override void LoadAsync(string path, Action<Object> callback)
-    {
-        Object targer;
-        if (assetMapping.TryGetValue(path, out targer))
+        public override Object[] LoadAll()
         {
-            callback?.Invoke(targer);
-        }
-        else
-        {
-            if (asyncLoading.Add(path))
+            Object[] assets = Resources.LoadAll(packagePath);
+            foreach (Object asset in assets)
             {
-                if (!singleCallBackDic.ContainsKey(path))
+                string path = packagePath + asset.name;
+                if (!assetMapping.ContainsKey(path))
                 {
-                    singleCallBackDic.Add(path, new HashSet<Action<Object>>());
+                    assetMapping.Add(path, asset);
                 }
-                singleCallBackDic[path].Add(callback);
-                Resources.LoadAsync(path).completed += OnLoadCompleted;
+            }
+            return assets;
+        }
+
+        public override void LoadAsync(string path, Action<Object> callback)
+        {
+            Object targer;
+            if (assetMapping.TryGetValue(path, out targer))
+            {
+                callback?.Invoke(targer);
             }
             else
             {
-                singleCallBackDic[path].Add(callback);
+                if (asyncLoading.Add(path))
+                {
+                    if (!singleCallBackDic.ContainsKey(path))
+                    {
+                        singleCallBackDic.Add(path, new HashSet<Action<Object>>());
+                    }
+                    singleCallBackDic[path].Add(callback);
+                    Resources.LoadAsync(path).completed += OnLoadCompleted;
+                }
+                else
+                {
+                    singleCallBackDic[path].Add(callback);
+                }
             }
         }
-    }
 
-    private void OnLoadCompleted(AsyncOperation obj)
-    {
-        ResourceRequest requset = obj as ResourceRequest;
-        requset.completed -= OnLoadCompleted;
-        string path = GetAssetPath(requset.asset.name);
-        Debug.Log(path);
-        assetMapping.Add(path, requset.asset);
-        asyncLoading.Remove(path);
-        foreach (Action<Object> call in singleCallBackDic[path])
+        private void OnLoadCompleted(AsyncOperation obj)
         {
-            call?.Invoke(requset.asset);
+            ResourceRequest requset = obj as ResourceRequest;
+            requset.completed -= OnLoadCompleted;
+            string path = GetAssetPath(requset.asset.name);
+            Debug.Log(path);
+            assetMapping.Add(path, requset.asset);
+            asyncLoading.Remove(path);
+            foreach (Action<Object> call in singleCallBackDic[path])
+            {
+                call?.Invoke(requset.asset);
+            }
+            singleCallBackDic[path].Clear();
         }
-        singleCallBackDic[path].Clear();
-    }
 
-    public override void LoadAllAsync(Action<Object[]> callback)
-    {
-        callback?.Invoke(LoadAll());
-    }
-
-    public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
-    {
-        this.packagePath = packagePath;
-        Debug.Log("[Asset Package] LoadPackage:" + packagePath);
-        callBack?.Invoke(this);
-    }
-
-    public override bool PackageLoaded()
-    {
-        return true;
-    }
-
-    public override void Unload(string path)
-    {
-        Object targer;
-        if (assetMapping.TryGetValue(path, out targer))
+        public override void LoadAllAsync(Action<Object[]> callback)
         {
-            assetMapping.Remove(path);
-            Unload(targer);
+            callback?.Invoke(LoadAll());
         }
-    }
 
-    public override void Unload(Object obj)
-    {
-        if (obj.GetType() != typeof(GameObject))
+        public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
-            Resources.UnloadAsset(obj);
+            this.packagePath = packagePath;
+            Debug.Log("[Asset Package] LoadPackage:" + packagePath);
+            callBack?.Invoke(this);
         }
-        else
+
+        public override bool PackageLoaded()
         {
+            return true;
+        }
+
+        public override void Unload(string path)
+        {
+            Object targer;
+            if (assetMapping.TryGetValue(path, out targer))
+            {
+                assetMapping.Remove(path);
+                Unload(targer);
+            }
+        }
+
+        public override void Unload(Object obj)
+        {
+            if (obj.GetType() != typeof(GameObject))
+            {
+                Resources.UnloadAsset(obj);
+            }
+            else
+            {
+                Resources.UnloadUnusedAssets();
+            }
+        }
+
+        public override void UnloadAll()
+        {
+            assetMapping.Clear();
             Resources.UnloadUnusedAssets();
         }
-    }
 
-    public override void UnloadAll()
-    {
-        assetMapping.Clear();
-        Resources.UnloadUnusedAssets();
-    }
-
-    private string GetAssetPath(string assetName)
-    {
-        return string.Format("{0}/{1}", packagePath, assetName);
+        private string GetAssetPath(string assetName)
+        {
+            return string.Format("{0}/{1}", packagePath, assetName);
+        }
     }
 }
