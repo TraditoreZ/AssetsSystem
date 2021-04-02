@@ -157,19 +157,19 @@ namespace AssetSystem
         //自身是否还持有资源引用或被其他包引用
         public bool CheckSelfRef()
         {
-            Debug.LogWarning(packagePath + " CheckSelfRef    " + _assetRef.Count + "    " + _packageRef.Count);
+            Debug.Log("BundleRef:     asset:" + _assetRef.Count + "     package:" + _packageRef.Count);
             return (_assetRef.Count > 0 || _packageRef.Count > 0);
         }
 
         public bool AddPackageRef(string package)
         {
-            Debug.Log(packagePath + "     AddPackageRef:" + package);
+            // Debug.Log(packagePath + "     AddPackageRef:" + package);
             return _packageRef.Add(package);
         }
 
         public bool RemovePackageRef(string package)
         {
-            Debug.Log(packagePath + "     RemovePackageRef:" + package);
+            //Debug.Log(packagePath + "     RemovePackageRef:" + package);
             return _packageRef.Remove(package);
         }
 
@@ -177,7 +177,6 @@ namespace AssetSystem
         public override void UnloadPackage()
         {
             base.UnloadPackage();
-            Debug.LogWarning("Unload AssetBundle:" + packagePath);
             m_AssetBundle.Unload(true);
             _packageRef.Clear();
             _assetRef.Clear();

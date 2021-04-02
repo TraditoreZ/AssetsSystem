@@ -188,7 +188,18 @@ namespace AssetSystem
                         }
                     }
                 }
-                UnloadPackage(packagePath);
+                bool immortal = false;  // 重要的包不卸载
+                foreach (var rule in rules)
+                {
+                    if (rule.packName == packagePath)
+                    {
+                        immortal = System.Array.IndexOf<string>(rule.options, "immortal") >= 0;
+                    }
+                }
+                if (!immortal)
+                {
+                    UnloadPackage(packagePath);
+                }
             }
         }
 
