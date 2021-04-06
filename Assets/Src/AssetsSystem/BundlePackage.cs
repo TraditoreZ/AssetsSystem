@@ -13,7 +13,7 @@ namespace AssetSystem
         private HashSet<string> _packageRef = new HashSet<string>();
         private Dictionary<string, Queue<Action<Object>>> asyncCallLists = new Dictionary<string, Queue<Action<Object>>>();
         private Queue<Action<Object[]>> asyncAllCallLists = new Queue<Action<Object[]>>();
-
+        private bool isStreamedSceneAssetBundle;
         public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
             base.LoadPackage(packagePath, async, callBack);
@@ -25,6 +25,7 @@ namespace AssetSystem
             else
             {
                 m_AssetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false));
+                isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
             }
         }
 
@@ -35,6 +36,7 @@ namespace AssetSystem
             if (m_AssetBundle == null)
             {
                 m_AssetBundle = req.assetBundle;
+                isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
             }
             else
             {
@@ -53,6 +55,11 @@ namespace AssetSystem
 
         public override Object Load(string path)
         {
+            if (isStreamedSceneAssetBundle)
+            {
+                Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + path);
+                return null;
+            }
             string assetName = GetAssetNameByPath(path);
             if (!m_AssetBundle.Contains(assetName))
             {
@@ -68,6 +75,11 @@ namespace AssetSystem
 
         public override Object[] LoadAll()
         {
+            if (isStreamedSceneAssetBundle)
+            {
+                Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + packagePath);
+                return null;
+            }
             Object[] objs = m_AssetBundle.LoadAllAssets();
             foreach (var obj in objs)
             {
@@ -78,6 +90,12 @@ namespace AssetSystem
 
         public override void LoadAsync(string path, Action<Object> callback)
         {
+            if (isStreamedSceneAssetBundle)
+            {
+                Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + packagePath);
+                callback?.Invoke(null);
+                return;
+            }
             string assetName = GetAssetNameByPath(path);
             if (!m_AssetBundle.Contains(assetName))
             {
@@ -109,6 +127,12 @@ namespace AssetSystem
 
         public override void LoadAllAsync(Action<Object[]> callback)
         {
+            if (isStreamedSceneAssetBundle)
+            {
+                Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + packagePath);
+                callback?.Invoke(null);
+                return;
+            }
             if (asyncAllCallLists.Count == 0)
             {
                 m_AssetBundle.LoadAllAssetsAsync().completed += OnAllAssetLoaded;
@@ -157,19 +181,17 @@ namespace AssetSystem
         //自身是否还持有资源引用或被其他包引用
         public bool CheckSelfRef()
         {
-            Debug.Log("BundleRef:     asset:" + _assetRef.Count + "     package:" + _packageRef.Count);
+            Debug.Log(packagePath + " BundleRef:     asset:" + _assetRef.Count + "     package:" + _packageRef.Count);
             return (_assetRef.Count > 0 || _packageRef.Count > 0);
         }
 
         public bool AddPackageRef(string package)
         {
-            // Debug.Log(packagePath + "     AddPackageRef:" + package);
             return _packageRef.Add(package);
         }
 
         public bool RemovePackageRef(string package)
         {
-            //Debug.Log(packagePath + "     RemovePackageRef:" + package);
             return _packageRef.Remove(package);
         }
 

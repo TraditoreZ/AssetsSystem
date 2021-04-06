@@ -73,7 +73,6 @@ namespace AssetSystem
 
         public override void LoadAllAsync(string packagePath, Action<Object[]> callback)
         {
-            packagePath = CombinePath(root, packagePath);
             string[] deps = allManifest.GetAllDependencies(packagePath);
             int currtDep = 0;
             foreach (var dep in deps)
@@ -90,7 +89,36 @@ namespace AssetSystem
                     }
                 });
             }
+        }
 
+        public override bool LoadAllRefPackage(string packagePath)
+        {
+            string[] deps = allManifest.GetAllDependencies(packagePath);
+            foreach (var dep in deps)
+            {
+                (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
+            }
+            return LoadPackage(packagePath) != null;
+        }
+
+        public override void LoadAllRefPackageAsync(string packagePath, Action<bool> callback)
+        {
+            string[] deps = allManifest.GetAllDependencies(packagePath);
+            int currtDep = 0;
+            foreach (var dep in deps)
+            {
+                LoadPackageAsync(dep, (depPackage) =>
+                {
+                    (depPackage as BundlePackage).AddPackageRef(packagePath);
+                    if (++currtDep == deps.Length)
+                    {
+                        LoadPackageAsync(packagePath, (package) =>
+                        {
+                            callback?.Invoke(package != null);
+                        });
+                    }
+                });
+            }
         }
 
         public override void Unload(string path)
@@ -124,7 +152,7 @@ namespace AssetSystem
             }
             else
             {
-                Debug.LogError("Bundle System Error: Not find Package by Obj:" + obj.name);
+                Debug.LogWarning("Bundle System Error: Not find Package by Obj:" + obj.name);
             }
         }
 
@@ -137,7 +165,7 @@ namespace AssetSystem
             }
             else
             {
-                Debug.LogError("Bundle System Error: Not Find Package:" + packagePath);
+                Debug.LogWarning("Bundle System Error: Not Find Package:" + packagePath);
             }
         }
 
@@ -157,7 +185,7 @@ namespace AssetSystem
                     return info.packName;
                 }
             }
-            Debug.LogError("path not rule package:" + path);
+            Debug.LogWarning("path not rule package:" + path);
             return path;
         }
 
@@ -195,6 +223,10 @@ namespace AssetSystem
                     {
                         immortal = System.Array.IndexOf<string>(rule.options, "immortal") >= 0;
                     }
+                }
+                if (immortal)
+                {
+                    Debug.Log("[immortal] " + packagePath + " is immortal, not unload");
                 }
                 if (!immortal)
                 {

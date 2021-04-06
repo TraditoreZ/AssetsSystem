@@ -14,6 +14,8 @@ namespace AssetEditor
         //====================================================================================================================
         const string configPath = "Assets/Src/AssetsSystem/Editor/exampleCfg";
         const BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression;//BuildAssetBundleOptions.ChunkBasedCompression;
+        const string cfg_AllBundleMD5 = "bundleMD5.cfg";
+        // 对应runtime也需要修改
         //==============================================================================================================
         private static AssetBundleRule[] rules;
 
@@ -22,6 +24,12 @@ namespace AssetEditor
         public static void BuildAssetBundleWindows()
         {
             BuildAssetBundle(BuildTarget.StandaloneWindows64);
+        }
+
+        [MenuItem("AssetSystem/BuildAssetBundle Increment [Windows]")]
+        public static void BuildAssetBundleWindowsIncrement()
+        {
+            BuildAssetBundle(BuildTarget.StandaloneWindows64, true);
         }
 
 
@@ -65,7 +73,7 @@ namespace AssetEditor
                 int max = packsDic.Values.Count;
                 foreach (var pack in packsDic.Values)
                 {
-                    EditorUtility.DisplayCancelableProgressBar("Create AssetPackage", string.Format("{0}     {1}:mb", pack.packageName, pack.size_MB), (float)index++ / max);
+                    EditorUtility.DisplayCancelableProgressBar("AssetBundleBuild", string.Format("{0}     {1}:mb", pack.packageName, pack.size_MB), (float)index++ / max);
                     AssetBundleBuild abb = new AssetBundleBuild();
                     abb.assetBundleName = pack.packageName;
                     abb.assetNames = pack.assets.ToArray();
@@ -89,20 +97,18 @@ namespace AssetEditor
                 // BuildPipeline.GetCRCForAssetBundle(pack.packageName, out crc);
                 // Debug.Log("Crc:" + crc);
                 AssetBundleManifest oldManifest = null;
-                if (File.Exists(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.instance.BundleSaveDirName)))
+                if (File.Exists(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget))))
                 {
-                    AssetBundle oldManifestBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.instance.BundleSaveDirName));
+                    AssetBundle oldManifestBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)));
                     oldManifest = oldManifestBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
                 }
                 AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(GetOutPath(buildTarget), abbLists.ToArray(), options, buildTarget);
-                if (oldManifest != null)
+                foreach (var asset in manifest.GetAllAssetBundles())
                 {
-                    foreach (var asset in manifest.GetAllAssetBundles())
+                    CreateBundleFrom(asset, manifest.GetAssetBundleHash(asset).ToString(), buildTarget);
+                    if (oldManifest != null && !oldManifest.GetAssetBundleHash(asset).Equals(manifest.GetAssetBundleHash(asset)))
                     {
-                        if (!oldManifest.GetAssetBundleHash(asset).Equals(manifest.GetAssetBundleHash(asset)))
-                        {
-                            CreateHashCheckTable(asset, oldManifest.GetAssetBundleHash(asset).ToString(), manifest.GetAssetBundleHash(asset).ToString(), buildTarget);
-                        }
+                        CreateHashCheck(asset, oldManifest.GetAssetBundleHash(asset).ToString(), manifest.GetAssetBundleHash(asset).ToString(), buildTarget);
                     }
                 }
                 Move2Project(buildTarget);
@@ -126,34 +132,25 @@ namespace AssetEditor
             return packs;
         }
 
-        // static void CreateABConfig(Dictionary<string, ABPackage> packsDic)
-        // {
-        //     AssetSystem.AssetConfig assetCfg = new AssetSystem.AssetConfig();
-        //     foreach (var pack in packsDic.Values)
-        //     {
-        //         string options = string.Join("", pack.options);
-        //         assetCfg.packInfos.Add(pack.packageName, options);
-        //         foreach (var path in pack.assets)
-        //         {
-        //             assetCfg.assetMaps.Add(path, pack.packageName);
-        //         }
-        //     }
-        //     FileStream fs = new FileStream(GetOutPath() + "/AssetBundleConf.txt", FileMode.Create);
-        //     StreamWriter sw = new StreamWriter(fs);
-        //     sw.Write(JsonUtility.ToJson(assetCfg));
-        //     sw.Flush();
-        //     sw.Close();
-        //     fs.Close();
-        // }
+        static void CreateBundleFrom(string package, string hash, BuildTarget buildTarget)
+        {
+            string command = string.Format("{0}:{1}", package, hash);
+            using (StreamWriter sw = new StreamWriter(Path.Combine(GetOutPath(buildTarget), cfg_AllBundleMD5), true))
+            {
+                sw.WriteLine(command);
+                sw.Flush();
+                sw.Close();
+            }
+        }
 
         // hash表单 记录bundle的所有修改 可用于任意时刻切曾量包
-        static void CreateHashCheckTable(string package, string oldHash, string newHash, BuildTarget buildTarget)
+        static void CreateHashCheck(string package, string oldHash, string newHash, BuildTarget buildTarget)
         {
-            using (StreamWriter sw = new StreamWriter(GetOutPath(buildTarget) + "/HashCheck.cfg", true))
+            string command = string.Format("{0}:{1}-{2}", package, oldHash, newHash);
+            Debug.Log("Package Changed:" + command);
+            using (StreamWriter sw = new StreamWriter(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.instance.BundleBillName), true))
             {
-                string command = string.Format("{0}:{1}>{2}", package, oldHash, newHash);
                 sw.WriteLine(command);
-                Debug.Log(command);
                 sw.Flush();
                 sw.Close();
             }
@@ -195,8 +192,6 @@ namespace AssetEditor
             string targer = string.Format("{0}/StreamingAssets/{1}", Application.dataPath, AssetBundlePathResolver.instance.BundleSaveDirName);
             ClearBundles(targer);
             CopyBundle(GetOutPath(buildTarget), targer, true);
-            //bundle移动到streaming内 跟随主体打包
-            //文件的复制粘贴操作即可
         }
 
         static void Move2Package()
@@ -211,7 +206,7 @@ namespace AssetEditor
                 Directory.CreateDirectory(todir);
             foreach (var s in Directory.GetFiles(srcdir))
             {
-                if (!s.EndsWith(".meta") && !s.EndsWith(".manifest"))
+                if (!s.EndsWith(".meta") && !s.EndsWith(".manifest") && !s.EndsWith(cfg_AllBundleMD5))
                 {
                     File.Copy(s, Path.Combine(todir, Path.GetFileName(s)), overwrite);
                 }
@@ -221,11 +216,11 @@ namespace AssetEditor
         }
 
 
-        static void ClearBundles(string dir)
+        static void ClearBundles(string rootDir)
         {
-            if (Directory.Exists(dir))
+            if (Directory.Exists(rootDir))
             {
-                DirectoryInfo di = new DirectoryInfo(dir);
+                DirectoryInfo di = new DirectoryInfo(rootDir);
                 di.Delete(true);
             }
         }

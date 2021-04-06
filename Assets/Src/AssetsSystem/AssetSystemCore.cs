@@ -118,6 +118,32 @@ namespace AssetSystem
             });
         }
 
+        public void LoadAllAsync(string path, Action<Object[]> callback)
+        {
+            m_Loader.LoadAllAsync(path, (obj) =>
+            {
+                callback(obj);
+            });
+        }
+
+        public void LoadAllAsync<T>(string path, Action<T[]> callback)
+        where T : Object
+        {
+            m_Loader.LoadAllAsync(path, (obj) =>
+            {
+                callback(Array.ConvertAll<Object, T>(obj, s => s as T));
+            });
+        }
+
+        public bool LoadPackage(string packagePath)
+        {
+            return m_Loader.LoadAllRefPackage(packagePath);
+        }
+
+        public void LoadPackageAsync(string packagePath, Action<bool> callback)
+        {
+            m_Loader.LoadAllRefPackageAsync(packagePath, callback);
+        }
 
         public void Unload(string path)
         {

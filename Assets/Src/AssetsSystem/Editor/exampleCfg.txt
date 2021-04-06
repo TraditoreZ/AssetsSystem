@@ -24,3 +24,6 @@ Assets/Resources/Actor/(.+?)/.+ => {0}_prefab
 
 Assets/GameAssets/Animation/(.+?)/.+ => {0}_animation
 //Assets/Resources/Animation/.* => animations
+
+// 场景
+Assets/Scenes/(\w*) => {0}_level

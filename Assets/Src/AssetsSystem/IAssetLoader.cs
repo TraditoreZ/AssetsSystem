@@ -13,6 +13,8 @@ namespace AssetSystem
         Object[] LoadAll(string packagePath);
         void LoadAsync(string path, Action<Object> callback);
         void LoadAllAsync(string path, Action<Object[]> callback);
+        bool LoadAllRefPackage(string packagePath);
+        void LoadAllRefPackageAsync(string packagePath, Action<bool> callback);
         void Unload(string path);
         void Unload(Object obj);
         void UnloadAll(string packagePath);
@@ -60,6 +62,18 @@ namespace AssetSystem
 
         public abstract void UnloadAll(string packagePath);
 
+        public virtual bool LoadAllRefPackage(string packagePath)
+        {
+            return LoadPackage(packagePath) != null;
+        }
+
+        public virtual void LoadAllRefPackageAsync(string packagePath, Action<bool> callback)
+        {
+            LoadPackageAsync(packagePath, (package) =>
+            {
+                callback?.Invoke(package != null);
+            });
+        }
 
         protected IAssetPackage LoadPackage(string packagePath)
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AssetSystem;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameMain : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class GameMain : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetBundle);
+        Asset.Initialize("Assets", LoadType.AssetBundle);
         //AssetSystemCore.Instance.Initialize("", LoadType.Resource);
         //AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetDatabase);
     }
@@ -26,17 +27,17 @@ public class GameMain : MonoBehaviour
     {
         if (GUILayout.Button("Load"))
         {
-            var go = AssetSystemCore.Instance.Load<GameObject>("Actor/2001_player_wumingdj/2001_player_wumingdj");
+            var go = Asset.Load<GameObject>("Resources/Actor/2001_player_wumingdj/2001_player_wumingdj");
             var instance = Instantiate(go, new Vector3(Random.Range(-3f, 3f), 0, 0), Quaternion.identity);
             objs.Add(instance);
         }
 
         if (GUILayout.Button("LoadAsync"))
         {
-            AssetSystemCore.Instance.LoadAsync("Actor/2001_player_wumingdj/2001_player_wumingdj", (go) =>
-            {
-                objs.Add(Instantiate(go, new Vector3(Random.Range(-3f, 3f), 0, 0), Quaternion.identity) as GameObject);
-            });
+            Asset.LoadAsync("Resources/Actor/2001_player_wumingdj/2001_player_wumingdj", (go) =>
+             {
+                 objs.Add(Instantiate(go, new Vector3(Random.Range(-3f, 3f), 0, 0), Quaternion.identity) as GameObject);
+             });
         }
 
         if (GUILayout.Button("Unload"))
@@ -46,7 +47,7 @@ public class GameMain : MonoBehaviour
                 Destroy(item);
             }
             objs.Clear();
-            AssetSystemCore.Instance.Unload("Actor/2001_player_wumingdj/2001_player_wumingdj");
+            Asset.Unload("Resources/Actor/2001_player_wumingdj/2001_player_wumingdj");
         }
 
         if (GUILayout.Button("UnloadAll"))
@@ -56,7 +57,25 @@ public class GameMain : MonoBehaviour
                 Destroy(item);
             }
             objs.Clear();
-            AssetSystemCore.Instance.UnloadAll("2001_player_wumingdj_prefab");
+            Asset.UnloadAll("Resources/2001_player_wumingdj_prefab");
+        }
+
+        if (GUILayout.Button("同步加载场景"))
+        {
+            Asset.LoadPackage("test_level");
+            SceneManager.LoadScene("test");
+        }
+
+        if (GUILayout.Button("异步加载场景"))
+        {
+            Asset.LoadPackageAsync("test_level", (ok) =>
+            {
+                Debug.Log("is ok :" + ok);
+                if (ok)
+                {
+                    SceneManager.LoadScene("test");
+                }
+            });
         }
 
 

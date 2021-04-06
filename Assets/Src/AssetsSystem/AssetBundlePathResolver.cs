@@ -34,11 +34,33 @@ namespace AssetSystem
         /// 取AB后缀
         /// </summary>
         public virtual string BundleSuffix { get { return ".ab"; } }
+        /// <summary>
+        /// Bundle增量变化表名称
+        /// </summary>
+        public virtual string BundleBillName { get { return "bundlebill.cfg"; } }
 
 #if UNITY_EDITOR
+        public static string GetBundlePlatformOutput(UnityEditor.BuildTarget buildTarget)
+        {
+            string target = "Bundle";
+            switch (buildTarget)
+            {
+                case UnityEditor.BuildTarget.StandaloneWindows64:
+                    target = "Windows";
+                    break;
+                case UnityEditor.BuildTarget.Android:
+                    target = "Android";
+                    break;
+                case UnityEditor.BuildTarget.iOS:
+                    target = "IOS";
+                    break;
+            }
+            return target;
+        }
+
         public static string BundleOutputPath(UnityEditor.BuildTarget buildTarget)
         {
-            return string.Format("{0}/../{1}/{2}", Application.dataPath, AssetBundlePathResolver.instance.BundleSaveDirName, buildTarget.ToString());
+            return string.Format("{0}/../{1}/{2}", Application.dataPath, AssetBundlePathResolver.instance.BundleSaveDirName, GetBundlePlatformOutput(buildTarget));
         }
 #endif
 
@@ -90,26 +112,21 @@ namespace AssetSystem
 
         public virtual string GetBundlePlatformRuntime()
         {
-            string path = string.Empty;
+            string path = "Bundle";
 #if UNITY_EDITOR
-            path = "StandaloneWindows64";
+            path = "Windows";
 #elif UNITY_ANDROID
             path = "Android";
 #elif UNITY_IOS
-            path = "iOS";
+            path = "IOS";
 #endif
             return path;
         }
 
-        /// <summary>
-        /// AB 依赖信息文件名
-        /// </summary>
-        public virtual string DependFileName { get { return "dep.all"; } }
-
         DirectoryInfo cacheDir;
 
         /// <summary>
-        /// 用于缓存AB的目录，要求可读写
+        /// 缓存AB目录，要求可读写
         /// </summary>
         public virtual string BundleCacheDir
         {
@@ -118,9 +135,9 @@ namespace AssetSystem
                 if (cacheDir == null)
                 {
 #if UNITY_EDITOR
-                    string dir = string.Format("{0}/{1}", Application.streamingAssetsPath, BundleSaveDirName);
+                    string dir = string.Format("{0}/{1}/{2}", Application.persistentDataPath, BundleSaveDirName, GetBundlePlatformRuntime());
 #else
-					string dir = string.Format("{0}/{1}", Application.persistentDataPath, BundleSaveDirName);
+                    string dir = string.Format("{0}/{1}/{2}", Application.persistentDataPath, BundleSaveDirName, GetBundlePlatformRuntime());
 #endif
                     cacheDir = new DirectoryInfo(dir);
                     if (!cacheDir.Exists)
