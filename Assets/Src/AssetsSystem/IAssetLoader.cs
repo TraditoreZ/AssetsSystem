@@ -18,6 +18,7 @@ namespace AssetSystem
         void Unload(string path);
         void Unload(Object obj);
         void UnloadAll(string packagePath);
+        string GetPackageName(string path);
     }
 
 
@@ -121,7 +122,7 @@ namespace AssetSystem
 
         protected abstract void DestoryPackage(IAssetPackage package);
 
-        protected abstract string GetPackageName(string path);
+        public abstract string GetPackageName(string path);
 
     }
 }

@@ -31,7 +31,7 @@ namespace AssetSystem
 
         public override Object Load(string path)
         {
-            string packagePath = GetPackageName(CombinePath(root, path));
+            string packagePath = GetPackageName(path);
             string[] deps = allManifest.GetAllDependencies(packagePath);
             foreach (var dep in deps)
             {
@@ -52,7 +52,7 @@ namespace AssetSystem
 
         public override void LoadAsync(string path, Action<Object> callback)
         {
-            string packagePath = GetPackageName(CombinePath(root, path));
+            string packagePath = GetPackageName(path);
             string[] deps = allManifest.GetAllDependencies(packagePath);
             int currtDep = 0;
             foreach (var dep in deps)
@@ -123,7 +123,7 @@ namespace AssetSystem
 
         public override void Unload(string path)
         {
-            string packagePath = GetPackageName(CombinePath(root, path));
+            string packagePath = GetPackageName(path);
             if (packMapping.ContainsKey(packagePath))
             {
                 LoadPackage(packagePath).Unload(path);
@@ -174,19 +174,20 @@ namespace AssetSystem
             base.Destory();
         }
 
-        protected override string GetPackageName(string path)
+        public override string GetPackageName(string path)
         {
+            string allPath = CombinePath(root, path);
             // 根据需求可以考虑缓存
             foreach (var rule in rules)
             {
-                var info = AssetBundleBuildConfig.MatchAssets(path, rule);
+                var info = AssetBundleBuildConfig.MatchAssets(allPath, rule);
                 if (info != null)
                 {
                     return info.packName;
                 }
             }
-            Debug.LogWarning("path not rule package:" + path);
-            return path;
+            Debug.LogWarning("path not rule package:" + allPath);
+            return allPath;
         }
 
         private string CombinePath(string p1, string p2)

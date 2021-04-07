@@ -69,6 +69,16 @@ namespace AssetSystem
             core.LoadPackageAsync(packagePath, callback);
         }
 
+        public static string LoadScene(string scenePath)
+        {
+            return core.LoadScene(scenePath);
+        }
+
+        public static void LoadSceneAsync(string scenePath, Action<string> callback)
+        {
+            core.LoadSceneAsync(scenePath, callback);
+        }
+
         public static void Unload(string path)
         {
             core.Unload(path);
@@ -82,6 +92,11 @@ namespace AssetSystem
         public static void UnloadAll(string path)
         {
             core.UnloadAll(path);
+        }
+
+        public static void UnloadScene(string scenePath)
+        {
+            core.UnloadScene(scenePath);
         }
 
     }

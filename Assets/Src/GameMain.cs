@@ -62,19 +62,16 @@ public class GameMain : MonoBehaviour
 
         if (GUILayout.Button("同步加载场景"))
         {
-            Asset.LoadPackage("test_level");
-            SceneManager.LoadScene("test");
+            string name = Asset.LoadScene("Scenes/test");
+            Debug.Log("scene:" + name);
+            SceneManager.LoadScene(name);
         }
 
         if (GUILayout.Button("异步加载场景"))
         {
-            Asset.LoadPackageAsync("test_level", (ok) =>
+            Asset.LoadSceneAsync("Scenes/test", (scene) =>
             {
-                Debug.Log("is ok :" + ok);
-                if (ok)
-                {
-                    SceneManager.LoadScene("test");
-                }
+                SceneManager.LoadScene(scene);
             });
         }
 

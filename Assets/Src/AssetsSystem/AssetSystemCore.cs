@@ -145,6 +145,27 @@ namespace AssetSystem
             m_Loader.LoadAllRefPackageAsync(packagePath, callback);
         }
 
+        public string LoadScene(string scenePath)
+        {
+            string scenePackage = m_Loader.GetPackageName(scenePath);
+            Debug.Log(scenePackage);
+            m_Loader.LoadAllRefPackage(scenePackage);
+            return GetSceneNameByPath(scenePath);
+        }
+
+        public void LoadSceneAsync(string scenePath, Action<string> callback)
+        {
+            string scenePackage = m_Loader.GetPackageName(scenePath);
+            m_Loader.LoadAllRefPackageAsync(scenePackage, (ok) =>
+            {
+                callback?.Invoke(GetSceneNameByPath(scenePath));
+                if (!ok)
+                {
+                    Debug.LogError("Not find Scene name:" + scenePath);
+                }
+            });
+        }
+
         public void Unload(string path)
         {
             m_Loader.Unload(path);
@@ -162,8 +183,17 @@ namespace AssetSystem
             m_Loader.UnloadAll(path);
         }
 
+        public void UnloadScene(string scenePath)
+        {
+            string scenePackage = m_Loader.GetPackageName(scenePath);
+            m_Loader.UnloadAll(scenePackage);
+        }
 
-
+        private string GetSceneNameByPath(string scenePath)
+        {
+            int index = scenePath.LastIndexOf('/');
+            return index >= 0 ? scenePath.Substring(index + 1, scenePath.Length - index - 1) : scenePath;
+        }
 
     }
 }

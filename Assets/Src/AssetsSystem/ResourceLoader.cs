@@ -84,7 +84,7 @@ namespace AssetSystem
             }
         }
 
-        protected override string GetPackageName(string path)
+        public override string GetPackageName(string path)
         {
             return path.Substring(0, path.LastIndexOf('/'));
         }
