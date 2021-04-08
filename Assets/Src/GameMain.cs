@@ -35,6 +35,18 @@ public class GameMain : MonoBehaviour
         if (GUILayout.Button("LoadAsync"))
         {
             Asset.LoadAsync("Resources/Actor/2001_player_wumingdj/2001_player_wumingdj", (go) =>
+            {
+            });
+            Asset.LoadAsync("Resources/Actor/2001_player_wumingdj/2001_player_wumingdj", (go) =>
+            {
+            });
+            Asset.LoadAsync("Resources/Actor/2001_player_wumingdj/2001_player_wumingdj", (go) =>
+            {
+            });
+            Asset.LoadAsync("Resources/Actor/2001_player_wumingdj/2001_player_wumingdj", (go) =>
+            {
+            });
+            Asset.LoadAsync("Resources/Actor/2001_player_wumingdj/2001_player_wumingdj", (go) =>
              {
                  objs.Add(Instantiate(go, new Vector3(Random.Range(-3f, 3f), 0, 0), Quaternion.identity) as GameObject);
              });

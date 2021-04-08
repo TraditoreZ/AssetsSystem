@@ -48,6 +48,7 @@ namespace AssetEditor
 
         public static void BuildAssetBundle(BuildTarget buildTarget = BuildTarget.StandaloneWindows64, bool increment = false)
         {
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
             try
             {
                 if (!increment)
@@ -58,7 +59,11 @@ namespace AssetEditor
                 {
                     System.IO.Directory.CreateDirectory(GetOutPath(buildTarget));
                 }
+                watch.Reset();
+                watch.Start();
                 string[] unityAssetPaths = AssetDatabase.GetAllAssetPaths();
+                watch.Stop();
+                Debug.Log("GetAllAssetPaths Time:" + RevertToTime(watch.ElapsedMilliseconds));
                 List<string> assetPaths = new List<string>();
                 foreach (var path in unityAssetPaths)
                 {
@@ -67,13 +72,18 @@ namespace AssetEditor
                         assetPaths.Add(path);
                     }
                 }
+                watch.Reset();
+                watch.Start();
                 Dictionary<string, ABPackage> packsDic = BuildAssetBundlePack(assetPaths.ToArray());
+                watch.Stop();
+                Debug.Log("BuildAssetBundlePack Time:" + RevertToTime(watch.ElapsedMilliseconds));
                 List<AssetBundleBuild> abbLists = new List<AssetBundleBuild>();
                 int index = 0;
                 int max = packsDic.Values.Count;
+                double bundlesize = 0;
                 foreach (var pack in packsDic.Values)
                 {
-                    EditorUtility.DisplayCancelableProgressBar("AssetBundleBuild", string.Format("{0}     {1}:mb", pack.packageName, pack.size_MB), (float)index++ / max);
+                    EditorUtility.DisplayCancelableProgressBar(string.Format("AssetBundleBuild[{0}/{1}]               {2:f2} mb", index, max, bundlesize += pack.size_MB), pack.packageName, (float)index++ / max);
                     AssetBundleBuild abb = new AssetBundleBuild();
                     abb.assetBundleName = pack.packageName;
                     abb.assetNames = pack.assets.ToArray();
@@ -89,20 +99,18 @@ namespace AssetEditor
                     Debug.LogError("Not Find " + configPath);
                     throw new System.Exception();
                 }
-                // 如果运行时采用正则表达式 那么可以不需要这张表了
-                //CreateABConfig(packsDic);
-                //根据BuildSetting里面所激活的平台进行打包 设置过AssetBundleName的都会进行打包  
-                //BuildPipeline.BuildAssetBundles(outputPath, options, buildTarget);
-                // uint crc = 0;
-                // BuildPipeline.GetCRCForAssetBundle(pack.packageName, out crc);
-                // Debug.Log("Crc:" + crc);
+
                 AssetBundleManifest oldManifest = null;
                 if (File.Exists(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget))))
                 {
                     AssetBundle oldManifestBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)));
                     oldManifest = oldManifestBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
                 }
+                watch.Reset();
+                watch.Start();
                 AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(GetOutPath(buildTarget), abbLists.ToArray(), options, buildTarget);
+                watch.Stop();
+                Debug.Log("BuildAssetBundles Time:" + RevertToTime(watch.ElapsedMilliseconds));
                 foreach (var asset in manifest.GetAllAssetBundles())
                 {
                     CreateBundleFrom(asset, manifest.GetAssetBundleHash(asset).ToString(), buildTarget);
@@ -117,6 +125,7 @@ namespace AssetEditor
             {
                 EditorUtility.ClearProgressBar();
                 AssetDatabase.Refresh();
+                watch.Reset();
             }
         }
 
@@ -224,5 +233,26 @@ namespace AssetEditor
                 di.Delete(true);
             }
         }
+
+        //转换为时分秒格式
+        private static string RevertToTime(long l)
+        {
+            int hour = 0;
+            int minute = 0;
+            int second = 0;
+            second = (int)(l / 1000);
+            if (second > 60)
+            {
+                minute = second / 60;
+                second = second % 60;
+            }
+            if (minute > 60)
+            {
+                hour = minute / 60;
+                minute = minute % 60;
+            }
+            return (hour.ToString() + ":" + minute.ToString() + ":" + second.ToString());
+        }
+
     }
 }
