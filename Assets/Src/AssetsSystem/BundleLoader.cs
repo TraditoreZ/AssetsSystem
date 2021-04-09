@@ -16,15 +16,7 @@ namespace AssetSystem
             base.Initialize(root);
             AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
             allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-            foreach (var item in allManifest.GetAllAssetBundles())
-            {
-                Debug.Log("init bundle:" + item);
-            }
             rules = AssetBundleBuildConfig.GetRules(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundleRule.txt"));
-            foreach (var rule in rules)
-            {
-                Debug.Log("init rule:" + rule.expression + " => " + rule.packName);
-            }
         }
 
 
@@ -32,7 +24,7 @@ namespace AssetSystem
         public override Object Load(string path)
         {
             string packagePath = GetPackageName(path);
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = allManifest.GetDirectDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -42,7 +34,7 @@ namespace AssetSystem
 
         public override Object[] LoadAll(string packagePath)
         {
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = allManifest.GetDirectDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -53,7 +45,7 @@ namespace AssetSystem
         public override void LoadAsync(string path, Action<Object> callback)
         {
             string packagePath = GetPackageName(path);
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = allManifest.GetDirectDependencies(packagePath);
             int currtDep = 0;
             foreach (var dep in deps)
             {
@@ -73,7 +65,7 @@ namespace AssetSystem
 
         public override void LoadAllAsync(string packagePath, Action<Object[]> callback)
         {
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = allManifest.GetDirectDependencies(packagePath);
             int currtDep = 0;
             foreach (var dep in deps)
             {
@@ -93,7 +85,7 @@ namespace AssetSystem
 
         public override bool LoadAllRefPackage(string packagePath)
         {
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = allManifest.GetDirectDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -103,7 +95,7 @@ namespace AssetSystem
 
         public override void LoadAllRefPackageAsync(string packagePath, Action<bool> callback)
         {
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = allManifest.GetDirectDependencies(packagePath);
             int currtDep = 0;
             foreach (var dep in deps)
             {
@@ -176,18 +168,21 @@ namespace AssetSystem
 
         public override string GetPackageName(string path)
         {
-            string allPath = CombinePath(root, path);
+            string fullPath = CombinePath(root, path);
+            //如果路径不含有后缀, 自动填入一个任何后缀格式
+            if (!System.Text.RegularExpressions.Regex.IsMatch(path, @".+\..+$"))
+                fullPath = fullPath + ".*";
             // 根据需求可以考虑缓存
             foreach (var rule in rules)
             {
-                var info = AssetBundleBuildConfig.MatchAssets(allPath, rule);
-                if (info != null)
+                var matchInfo = AssetBundleBuildConfig.MatchAssets(fullPath, rule);
+                if (matchInfo != null)
                 {
-                    return info.packName;
+                    return matchInfo.packName;
                 }
             }
-            Debug.LogWarning("path not rule package:" + allPath);
-            return allPath;
+            Debug.LogError("GetPackageName Fall:" + path);
+            return string.Empty;
         }
 
         private string CombinePath(string p1, string p2)
@@ -205,7 +200,7 @@ namespace AssetSystem
             BundlePackage rp = LoadPackage(packagePath) as BundlePackage;
             if (!rp.CheckSelfRef())
             {
-                string[] deps = allManifest.GetAllDependencies(packagePath);
+                string[] deps = allManifest.GetDirectDependencies(packagePath);
                 foreach (var dep in deps)
                 {
                     if (packMapping.ContainsKey(dep))

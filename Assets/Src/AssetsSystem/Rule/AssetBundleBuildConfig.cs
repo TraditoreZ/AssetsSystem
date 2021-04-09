@@ -57,8 +57,8 @@ namespace AssetSystem
                     packName = string.Format(rule.packName, format);
                 }
                 AssetBundleMatchInfo info = new AssetBundleMatchInfo();
-                info.path = path;
-                info.packName = packName;
+                info.path = path.ToLower();
+                info.packName = packName.ToLower();
                 info.options = rule.options;
                 if (rule.subRule.Count > 0)
                 {
