@@ -24,7 +24,7 @@ namespace AssetSystem
         public override Object Load(string path)
         {
             string packagePath = GetPackageName(path);
-            string[] deps = allManifest.GetDirectDependencies(packagePath);
+            string[] deps = allManifest.GetAllDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -34,7 +34,7 @@ namespace AssetSystem
 
         public override Object[] LoadAll(string packagePath)
         {
-            string[] deps = allManifest.GetDirectDependencies(packagePath);
+            string[] deps = allManifest.GetAllDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -45,47 +45,67 @@ namespace AssetSystem
         public override void LoadAsync(string path, Action<Object> callback)
         {
             string packagePath = GetPackageName(path);
-            string[] deps = allManifest.GetDirectDependencies(packagePath);
-            int currtDep = 0;
-            foreach (var dep in deps)
+            string[] deps = allManifest.GetAllDependencies(packagePath);
+            if (deps.Length > 0)
             {
-                LoadPackageAsync(dep, (depPackage) =>
+                int currtDep = 0;
+                foreach (var dep in deps)
                 {
-                    (depPackage as BundlePackage).AddPackageRef(packagePath);
-                    if (++currtDep == deps.Length)
+                    LoadPackageAsync(dep, (depPackage) =>
                     {
-                        LoadPackageAsync(packagePath, (package) =>
+                        (depPackage as BundlePackage).AddPackageRef(packagePath);
+                        if (++currtDep == deps.Length)
                         {
-                            package.LoadAsync(path, callback);
-                        });
-                    }
+                            LoadPackageAsync(packagePath, (package) =>
+                            {
+                                package.LoadAsync(path, callback);
+                            });
+                        }
+                    });
+                }
+            }
+            else
+            {
+                LoadPackageAsync(packagePath, (package) =>
+                {
+                    package.LoadAsync(path, callback);
                 });
             }
         }
 
         public override void LoadAllAsync(string packagePath, Action<Object[]> callback)
         {
-            string[] deps = allManifest.GetDirectDependencies(packagePath);
-            int currtDep = 0;
-            foreach (var dep in deps)
+            string[] deps = allManifest.GetAllDependencies(packagePath);
+            if (deps.Length > 0)
             {
-                LoadPackageAsync(dep, (depPackage) =>
+                int currtDep = 0;
+                foreach (var dep in deps)
                 {
-                    (depPackage as BundlePackage).AddPackageRef(packagePath);
-                    if (++currtDep == deps.Length)
+                    LoadPackageAsync(dep, (depPackage) =>
                     {
-                        LoadPackageAsync(packagePath, (package) =>
+                        (depPackage as BundlePackage).AddPackageRef(packagePath);
+                        if (++currtDep == deps.Length)
                         {
-                            package.LoadAllAsync(callback);
-                        });
-                    }
+                            LoadPackageAsync(packagePath, (package) =>
+                            {
+                                package.LoadAllAsync(callback);
+                            });
+                        }
+                    });
+                }
+            }
+            else
+            {
+                LoadPackageAsync(packagePath, (package) =>
+                {
+                    package.LoadAllAsync(callback);
                 });
             }
         }
 
         public override bool LoadAllRefPackage(string packagePath)
         {
-            string[] deps = allManifest.GetDirectDependencies(packagePath);
+            string[] deps = allManifest.GetAllDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -95,20 +115,30 @@ namespace AssetSystem
 
         public override void LoadAllRefPackageAsync(string packagePath, Action<bool> callback)
         {
-            string[] deps = allManifest.GetDirectDependencies(packagePath);
-            int currtDep = 0;
-            foreach (var dep in deps)
+            string[] deps = allManifest.GetAllDependencies(packagePath);
+            if (deps.Length > 0)
             {
-                LoadPackageAsync(dep, (depPackage) =>
+                int currtDep = 0;
+                foreach (var dep in deps)
                 {
-                    (depPackage as BundlePackage).AddPackageRef(packagePath);
-                    if (++currtDep == deps.Length)
+                    LoadPackageAsync(dep, (depPackage) =>
                     {
-                        LoadPackageAsync(packagePath, (package) =>
+                        (depPackage as BundlePackage).AddPackageRef(packagePath);
+                        if (++currtDep == deps.Length)
                         {
-                            callback?.Invoke(package != null);
-                        });
-                    }
+                            LoadPackageAsync(packagePath, (package) =>
+                            {
+                                callback?.Invoke(package != null);
+                            });
+                        }
+                    });
+                }
+            }
+            else
+            {
+                LoadPackageAsync(packagePath, (package) =>
+                {
+                    callback?.Invoke(package != null);
                 });
             }
         }
@@ -200,7 +230,7 @@ namespace AssetSystem
             BundlePackage rp = LoadPackage(packagePath) as BundlePackage;
             if (!rp.CheckSelfRef())
             {
-                string[] deps = allManifest.GetDirectDependencies(packagePath);
+                string[] deps = allManifest.GetAllDependencies(packagePath);
                 foreach (var dep in deps)
                 {
                     if (packMapping.ContainsKey(dep))
