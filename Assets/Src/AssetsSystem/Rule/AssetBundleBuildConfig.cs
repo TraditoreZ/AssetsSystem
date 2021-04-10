@@ -43,6 +43,8 @@ namespace AssetSystem
 
         public static AssetBundleMatchInfo MatchAssets(string path, AssetBundleRule rule)
         {
+            // 路径小写处理
+            path = path.ToLower();
             if (Regex.IsMatch(path, rule.expression))
             {
                 var match = Regex.Match(path, rule.expression);
@@ -57,8 +59,8 @@ namespace AssetSystem
                     packName = string.Format(rule.packName, format);
                 }
                 AssetBundleMatchInfo info = new AssetBundleMatchInfo();
-                info.path = path.ToLower();
-                info.packName = packName.ToLower();
+                info.path = path;
+                info.packName = packName;
                 info.options = rule.options;
                 if (rule.subRule.Count > 0)
                 {
@@ -95,7 +97,8 @@ namespace AssetSystem
             {
                 return;
             }
-
+            // 全部小写, 因为路径不区分大小写比较好
+            command = command.ToLower();
             if (command.Contains("=>"))// 命令解析
             {
                 AssetBundleRule tempRule = new AssetBundleRule();
