@@ -66,7 +66,7 @@ namespace AssetSystem
                     break;
 #endif
             }
-            m_Loader.Initialize(root);
+            m_Loader.Initialize(root.ToLower());
         }
 
         void OnDestory()
@@ -76,7 +76,7 @@ namespace AssetSystem
 
         public Object Load(string path)
         {
-            return m_Loader.Load(path);
+            return m_Loader.Load(path.ToLower());
         }
 
 
@@ -89,7 +89,7 @@ namespace AssetSystem
 
         public Object[] LoadAll(string path)
         {
-            return m_Loader.LoadAll(path);
+            return m_Loader.LoadAll(path.ToLower());
         }
 
 
@@ -102,7 +102,7 @@ namespace AssetSystem
 
         public void LoadAsync(string path, Action<Object> callback)
         {
-            m_Loader.LoadAsync(path, (obj) =>
+            m_Loader.LoadAsync(path.ToLower(), (obj) =>
             {
                 callback.Invoke(obj);
             });
@@ -112,7 +112,7 @@ namespace AssetSystem
         public void LoadAsync<T>(string path, Action<T> callback)
         where T : Object
         {
-            LoadAsync(path, (obj) =>
+            LoadAsync(path.ToLower(), (obj) =>
             {
                 callback(obj as T);
             });
@@ -120,7 +120,7 @@ namespace AssetSystem
 
         public void LoadAllAsync(string path, Action<Object[]> callback)
         {
-            m_Loader.LoadAllAsync(path, (obj) =>
+            m_Loader.LoadAllAsync(path.ToLower(), (obj) =>
             {
                 callback(obj);
             });
@@ -129,7 +129,7 @@ namespace AssetSystem
         public void LoadAllAsync<T>(string path, Action<T[]> callback)
         where T : Object
         {
-            m_Loader.LoadAllAsync(path, (obj) =>
+            m_Loader.LoadAllAsync(path.ToLower(), (obj) =>
             {
                 callback(Array.ConvertAll<Object, T>(obj, s => s as T));
             });
@@ -137,26 +137,26 @@ namespace AssetSystem
 
         public bool LoadPackage(string packagePath)
         {
-            return m_Loader.LoadAllRefPackage(packagePath);
+            return m_Loader.LoadAllRefPackage(packagePath.ToLower());
         }
 
         public void LoadPackageAsync(string packagePath, Action<bool> callback)
         {
-            m_Loader.LoadAllRefPackageAsync(packagePath, callback);
+            m_Loader.LoadAllRefPackageAsync(packagePath.ToLower(), callback);
         }
 
         public string LoadScene(string scenePath)
         {
             string scenePackage = m_Loader.GetPackageName(scenePath);
             Debug.Log(scenePackage);
-            m_Loader.LoadAllRefPackage(scenePackage);
+            m_Loader.LoadAllRefPackage(scenePackage.ToLower());
             return GetSceneNameByPath(scenePath);
         }
 
         public void LoadSceneAsync(string scenePath, Action<string> callback)
         {
             string scenePackage = m_Loader.GetPackageName(scenePath);
-            m_Loader.LoadAllRefPackageAsync(scenePackage, (ok) =>
+            m_Loader.LoadAllRefPackageAsync(scenePackage.ToLower(), (ok) =>
             {
                 callback?.Invoke(GetSceneNameByPath(scenePath));
                 if (!ok)
@@ -168,7 +168,7 @@ namespace AssetSystem
 
         public void Unload(string path)
         {
-            m_Loader.Unload(path);
+            m_Loader.Unload(path.ToLower());
         }
 
 
@@ -180,13 +180,13 @@ namespace AssetSystem
 
         public void UnloadAll(string path)
         {
-            m_Loader.UnloadAll(path);
+            m_Loader.UnloadAll(path.ToLower());
         }
 
         public void UnloadScene(string scenePath)
         {
             string scenePackage = m_Loader.GetPackageName(scenePath);
-            m_Loader.UnloadAll(scenePackage);
+            m_Loader.UnloadAll(scenePackage.ToLower());
         }
 
         private string GetSceneNameByPath(string scenePath)

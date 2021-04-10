@@ -59,7 +59,7 @@ namespace AssetSystem
         public virtual void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
             this.packagePath = packagePath;
-            Debug.Log("[Asset Package] LoadPackage:" + packagePath);
+            // Debug.Log("[Asset Package] LoadPackage:" + packagePath);
         }
 
         public void OnPackageLoaded(Action<IAssetPackage> callBack)
@@ -75,7 +75,7 @@ namespace AssetSystem
 
         public virtual void UnloadPackage()
         {
-            Debug.Log("[Asset Package] UnloadPackage:" + packagePath);
+            // Debug.Log("[Asset Package] UnloadPackage:" + packagePath);
             UnloadAll();
         }
 

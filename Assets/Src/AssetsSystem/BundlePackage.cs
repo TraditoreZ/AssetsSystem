@@ -15,9 +15,16 @@ namespace AssetSystem
         private Dictionary<string, Queue<Action<Object>>> asyncCallLists = new Dictionary<string, Queue<Action<Object>>>();
         private Queue<Action<Object[]>> asyncAllCallLists = new Queue<Action<Object[]>>();
         private bool isStreamedSceneAssetBundle;
+        private bool NULLPACKAGE = false;
         public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
             base.LoadPackage(packagePath, async, callBack);
+            NULLPACKAGE = !System.IO.File.Exists(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false));
+            if (NULLPACKAGE)
+            {
+                callBack?.Invoke(this);
+                return;
+            }
             if (async)
             {
                 AssetBundle.LoadFromFileAsync(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false)).completed += OnAssetBundleLoaded;
@@ -51,11 +58,16 @@ namespace AssetSystem
 
         public override bool PackageLoaded()
         {
-            return m_AssetBundle != null;
+            return NULLPACKAGE == false && m_AssetBundle != null;
         }
 
         public override Object Load(string path)
         {
+            if (NULLPACKAGE)
+            {
+                Debug.LogError("AssetBunle Error Null package:" + packagePath);
+                return null;
+            }
             if (isStreamedSceneAssetBundle)
             {
                 Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + path);
@@ -81,6 +93,11 @@ namespace AssetSystem
 
         public override Object[] LoadAll()
         {
+            if (NULLPACKAGE)
+            {
+                Debug.LogError("AssetBunle Error Null package:" + packagePath);
+                return null;
+            }
             if (isStreamedSceneAssetBundle)
             {
                 Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + packagePath);
@@ -104,6 +121,12 @@ namespace AssetSystem
 
         public override void LoadAsync(string path, Action<Object> callback)
         {
+            if (NULLPACKAGE)
+            {
+                Debug.LogError("AssetBunle Error Null package:" + packagePath);
+                callback?.Invoke(null);
+                return;
+            }
             if (isStreamedSceneAssetBundle)
             {
                 Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + packagePath);
@@ -140,15 +163,22 @@ namespace AssetSystem
         {
             AssetBundleRequest req = obj as AssetBundleRequest;
             req.completed -= OnAssetLoaded;
-            _assetRef.Add(req.asset.name, req.asset);
-            while (asyncCallLists[req.asset.name].Count > 0)
+            string assetName = req.asset.name.ToLower();
+            _assetRef.Add(assetName, req.asset);
+            while (asyncCallLists[assetName].Count > 0)
             {
-                asyncCallLists[req.asset.name].Dequeue()?.Invoke(req.asset);
+                asyncCallLists[assetName].Dequeue()?.Invoke(req.asset);
             }
         }
 
         public override void LoadAllAsync(Action<Object[]> callback)
         {
+            if (NULLPACKAGE)
+            {
+                Debug.LogError("AssetBunle Error Null package:" + packagePath);
+                callback?.Invoke(null);
+                return;
+            }
             if (isStreamedSceneAssetBundle)
             {
                 Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + packagePath);
@@ -176,9 +206,10 @@ namespace AssetSystem
             req.completed -= OnAllAssetLoaded;
             foreach (var asset in req.allAssets)
             {
-                if (!_assetRef.ContainsKey(asset.name))
+                string assetName = asset.name.ToLower();
+                if (!_assetRef.ContainsKey(assetName))
                 {
-                    _assetRef.Add(asset.name, asset);
+                    _assetRef.Add(assetName, asset);
                 }
             }
             while (asyncAllCallLists.Count > 0)
@@ -214,7 +245,7 @@ namespace AssetSystem
         //自身是否还持有资源引用或被其他包引用
         public bool CheckSelfRef()
         {
-            Debug.Log(packagePath + " BundleRef:     asset:" + _assetRef.Count + "     package:" + _packageRef.Count);
+            // Debug.Log(packagePath + " BundleRef:     asset:" + _assetRef.Count + "     package:" + _packageRef.Count);
             return (_assetRef.Count > 0 || _packageRef.Count > 0);
         }
 

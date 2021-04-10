@@ -151,10 +151,10 @@ namespace AssetSystem
                 LoadPackage(packagePath).Unload(path);
                 DestoryNoneRefPackage(packagePath);
             }
-            else
-            {
-                Debug.LogError("Bundle System Error: Not Find Package:" + packagePath);
-            }
+            // else
+            // {
+            //     Debug.LogError("Unload Error   path:" + path);
+            // }
         }
 
         public override void Unload(Object obj)
@@ -172,10 +172,10 @@ namespace AssetSystem
                 package.Unload(obj);
                 DestoryNoneRefPackage(package.PackagePath());
             }
-            else
-            {
-                Debug.LogWarning("Bundle System Error: Not find Package by Obj:" + obj.name);
-            }
+            // else
+            // {
+            //     Debug.LogWarning("Bundle System Error: Not find Package by Obj:" + obj.name);
+            // }
         }
 
         public override void UnloadAll(string packagePath)
@@ -185,10 +185,10 @@ namespace AssetSystem
                 LoadPackage(packagePath).UnloadAll();
                 DestoryNoneRefPackage(packagePath);
             }
-            else
-            {
-                Debug.LogWarning("Bundle System Error: Not Find Package:" + packagePath);
-            }
+            // else
+            // {
+            //     Debug.LogWarning("Bundle System Error: Not Find Package:" + packagePath);
+            // }
         }
 
         public override void Destory()
