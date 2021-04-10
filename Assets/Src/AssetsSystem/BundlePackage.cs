@@ -3,13 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using AssetSystem;
 using UnityEngine;
+using System.Linq;
 using Object = UnityEngine.Object;
 namespace AssetSystem
 {
     public class BundlePackage : BaseAssetPackage<BundlePackage>
     {
         private AssetBundle m_AssetBundle;
-        private HashSet<string> _assetRef = new HashSet<string>();
+        private Dictionary<string, Object> _assetRef = new Dictionary<string, Object>();
         private HashSet<string> _packageRef = new HashSet<string>();
         private Dictionary<string, Queue<Action<Object>>> asyncCallLists = new Dictionary<string, Queue<Action<Object>>>();
         private Queue<Action<Object[]>> asyncAllCallLists = new Queue<Action<Object[]>>();
@@ -66,8 +67,13 @@ namespace AssetSystem
                 Debug.LogError("AssetBunle Load Error: Not find:" + path);
                 return null;
             }
-            Object asset = m_AssetBundle.LoadAsset(assetName);
-            _assetRef.Add(assetName);
+            Object asset = null;
+            if (!_assetRef.TryGetValue(assetName, out asset))
+            {
+                asset = m_AssetBundle.LoadAsset(assetName);
+                _assetRef.Add(assetName, asset);
+            }
+            // _assetRef.Add(assetName);
             return asset;
         }
 
@@ -80,12 +86,20 @@ namespace AssetSystem
                 Debug.LogError("AssetBunle isStreamedSceneAssetBundle:" + packagePath);
                 return null;
             }
-            Object[] objs = m_AssetBundle.LoadAllAssets();
-            foreach (var obj in objs)
+            string[] names = m_AssetBundle.GetAllAssetNames();
+            Object[] objs = new Object[names.Length];
+            for (int i = 0; i < names.Length; i++)
             {
-                _assetRef.Add(obj.name);
+                string assetName = names[i];
+                Object asset = null;
+                if (!_assetRef.TryGetValue(assetName, out asset))
+                {
+                    asset = m_AssetBundle.LoadAsset(assetName);
+                    _assetRef.Add(assetName, asset);
+                }
+                objs[i] = asset;
             }
-            return m_AssetBundle.LoadAllAssets();
+            return objs;
         }
 
         public override void LoadAsync(string path, Action<Object> callback)
@@ -103,22 +117,30 @@ namespace AssetSystem
                 callback?.Invoke(null);
                 return;
             }
-            if (!asyncCallLists.ContainsKey(assetName))
+            Object asset = null;
+            if (_assetRef.TryGetValue(assetName, out asset))
             {
-                asyncCallLists.Add(assetName, new Queue<Action<Object>>());
+                callback?.Invoke(asset);
             }
-            if (asyncCallLists[assetName].Count == 0)
+            else
             {
-                m_AssetBundle.LoadAssetAsync(assetName).completed += OnAssetLoaded;
+                if (!asyncCallLists.ContainsKey(assetName))
+                {
+                    asyncCallLists.Add(assetName, new Queue<Action<Object>>());
+                }
+                if (asyncCallLists[assetName].Count == 0)
+                {
+                    m_AssetBundle.LoadAssetAsync(assetName).completed += OnAssetLoaded;
+                }
+                asyncCallLists[assetName].Enqueue(callback);
             }
-            asyncCallLists[assetName].Enqueue(callback);
         }
 
         private void OnAssetLoaded(AsyncOperation obj)
         {
             AssetBundleRequest req = obj as AssetBundleRequest;
             req.completed -= OnAssetLoaded;
-            _assetRef.Add(req.asset.name);
+            _assetRef.Add(req.asset.name, req.asset);
             while (asyncCallLists[req.asset.name].Count > 0)
             {
                 asyncCallLists[req.asset.name].Dequeue()?.Invoke(req.asset);
@@ -133,11 +155,19 @@ namespace AssetSystem
                 callback?.Invoke(null);
                 return;
             }
-            if (asyncAllCallLists.Count == 0)
+            string[] names = m_AssetBundle.GetAllAssetNames();
+            if (names.Length == _assetRef.Count)
             {
-                m_AssetBundle.LoadAllAssetsAsync().completed += OnAllAssetLoaded;
+                callback?.Invoke(_assetRef.Values.ToArray());
             }
-            asyncAllCallLists.Enqueue(callback);
+            else
+            {
+                if (asyncAllCallLists.Count == 0)
+                {
+                    m_AssetBundle.LoadAllAssetsAsync().completed += OnAllAssetLoaded;
+                }
+                asyncAllCallLists.Enqueue(callback);
+            }
         }
 
         private void OnAllAssetLoaded(AsyncOperation obj)
@@ -146,7 +176,10 @@ namespace AssetSystem
             req.completed -= OnAllAssetLoaded;
             foreach (var asset in req.allAssets)
             {
-                _assetRef.Add(asset.name);
+                if (!_assetRef.ContainsKey(asset.name))
+                {
+                    _assetRef.Add(asset.name, asset);
+                }
             }
             while (asyncAllCallLists.Count > 0)
             {
