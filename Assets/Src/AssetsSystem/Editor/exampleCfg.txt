@@ -13,17 +13,17 @@ Assets/GameAssets/LightMaps/(map\d+)/.+ => {0}_level_assets : bigbundle
 //====================================================================
 // shaders 把 工程中的shader分成两个常驻内存的包
 //====================================================================
-Assets/Resources/Shaders/(.+/)?.+ => main_shaders : immortal
+Assets/Res/Shaders/(.+/)?.+ => main_shaders : immortal
 //Assets/Editor/External/NGUI/Resources/Shaders/.+.shader => NGUI_default_shaders : explicit | immortal
 //===================================================================
 // 角色相关测试
-Assets/Resources/Actor/(.+?)/.+ => {0}_prefab
+Assets/Res/Actor/(.+?)/.+ => {0}_prefab
 //Assets/GameAssets/Actor/(.+?)/.+ => {0}_prefab
 //Assets/GameAssets/Actor/.+/(.+?)/.+ => {0}_prefab
 //Assets/GameAssets/Actor/(.+?)/.+ => Actor_prefab
 
 Assets/GameAssets/Animation/(.+?)/.+ => {0}_animation
-//Assets/Resources/Animation/.* => animations
+//Assets/Res/Animation/.* => animations
 
 // 场景
 Assets/Scenes/(\w*) => {0}_level

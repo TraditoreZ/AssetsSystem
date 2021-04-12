@@ -89,16 +89,10 @@ namespace AssetEditor
                     abb.assetNames = pack.assets.ToArray();
                     abbLists.Add(abb);
                 }
-                if (File.Exists(configPath.EndsWith(".txt") ? configPath : configPath + ".txt"))
-                {
-
-                    File.Copy(configPath.EndsWith(".txt") ? configPath : configPath + ".txt", Path.Combine(GetOutPath(buildTarget), "bundleRule.txt"), true);
-                }
-                else
-                {
-                    Debug.LogError("Not Find " + configPath);
-                    throw new System.Exception();
-                }
+                AssetBundleBuild configABB = new AssetBundleBuild();
+                configABB.assetBundleName = "bundle.rule";
+                configABB.assetNames = new string[] { configPath.EndsWith(".txt") ? configPath : configPath + ".txt" };
+                abbLists.Add(configABB);
 
                 AssetBundleManifest oldManifest = null;
                 if (File.Exists(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget))))

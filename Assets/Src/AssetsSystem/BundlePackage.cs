@@ -19,12 +19,6 @@ namespace AssetSystem
         public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
             base.LoadPackage(packagePath, async, callBack);
-            NULLPACKAGE = !System.IO.File.Exists(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false));
-            if (NULLPACKAGE)
-            {
-                callBack?.Invoke(this);
-                return;
-            }
             if (async)
             {
                 AssetBundle.LoadFromFileAsync(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false)).completed += OnAssetBundleLoaded;
@@ -33,7 +27,15 @@ namespace AssetSystem
             else
             {
                 m_AssetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false));
-                isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
+                if (m_AssetBundle != null)
+                {
+                    isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
+                }
+                else
+                {
+                    Debug.LogError("Null bundle package:" + packagePath);
+                    NULLPACKAGE = true;
+                }
             }
         }
 
@@ -41,19 +43,28 @@ namespace AssetSystem
         {
             AssetBundleCreateRequest req = obj as AssetBundleCreateRequest;
             req.completed -= OnAssetBundleLoaded;
-            if (m_AssetBundle == null)
+            if (req.assetBundle != null)
             {
-                m_AssetBundle = req.assetBundle;
-                isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
+                if (m_AssetBundle == null)
+                {
+                    m_AssetBundle = req.assetBundle;
+                    isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
+                }
+                else
+                {
+                    req.assetBundle.Unload(true);
+                }
+                while (packageLoadedCalls.Count > 0)
+                {
+                    packageLoadedCalls.Dequeue()?.Invoke(this);
+                }
             }
             else
             {
-                req.assetBundle.Unload(true);
+                Debug.LogError("Null bundle package:" + packagePath);
+                NULLPACKAGE = true;
             }
-            while (packageLoadedCalls.Count > 0)
-            {
-                packageLoadedCalls.Dequeue()?.Invoke(this);
-            }
+
         }
 
         public override bool PackageLoaded()

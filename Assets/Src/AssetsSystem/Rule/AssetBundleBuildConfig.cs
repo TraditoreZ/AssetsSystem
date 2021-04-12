@@ -13,14 +13,6 @@ namespace AssetSystem
         {
             List<AssetBundleRule> ruleList = new List<AssetBundleRule>();
             //SystemRule
-            ResolveRule(ruleList, path);
-            return ruleList.Count > 0 ? ruleList.ToArray() : null;
-        }
-
-
-
-        public static void ResolveRule(List<AssetBundleRule> customRule, string path)
-        {
             if (path.LastIndexOf(".txt") == -1)
             {
                 path += ".txt";
@@ -28,13 +20,21 @@ namespace AssetSystem
             if (!File.Exists(path))
             {
                 Debug.LogError("Not Find Path:" + path);
-                return;
+                return null;
             }
             var strs = File.ReadAllLines(path);
+            ResolveRule(ruleList, strs);
+            return ruleList.Count > 0 ? ruleList.ToArray() : null;
+        }
+
+
+
+        public static void ResolveRule(List<AssetBundleRule> customRule, string[] commonds)
+        {
             ruleStack.Clear();
             currtRule = null;
             // 进行解析
-            foreach (var line in strs)
+            foreach (var line in commonds)
             {
                 ResolveCommand(customRule, line);
             }

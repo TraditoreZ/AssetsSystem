@@ -5,18 +5,23 @@ using UnityEngine;
 using System.IO;
 using Object = UnityEngine.Object;
 using AssetSystem;
+using System.Linq;
 namespace AssetSystem
 {
     internal class BundleLoader : BaseAssetLoader
     {
         public static AssetBundleManifest allManifest;
-        private AssetBundleRule[] rules;
+        private List<AssetBundleRule> rules;
         public override void Initialize(string root)
         {
             base.Initialize(root);
             AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
             allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-            rules = AssetBundleBuildConfig.GetRules(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundleRule.txt"));
+            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
+            string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            ruleAB.Unload(true);
+            rules = new List<AssetBundleRule>();
+            AssetBundleBuildConfig.ResolveRule(rules, commands);
         }
 
 
