@@ -204,7 +204,7 @@ namespace AssetSystem
         public override string GetPackageName(string path)
         {
             //如果路径包含Asset根目录， 则不进行根目录合并
-            string fullPath = path.IndexOf("Assets/") >= 0 ? path : CombinePath(root, path);
+            string fullPath = path.IndexOf("assets/") >= 0 ? path : CombinePath(root, path);
             //如果路径不含有后缀, 自动填入一个任何后缀格式
             if (!System.Text.RegularExpressions.Regex.IsMatch(path, @".+\..+$"))
                 fullPath = fullPath + ".*";
