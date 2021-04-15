@@ -20,9 +20,11 @@ namespace AssetSystem
             Object targer;
             if (!assetMapping.TryGetValue(path, out targer))
             {
-                Debug.Log(GetAssetSuffix(packagePath, path));
                 targer = AssetDatabase.LoadAssetAtPath<Object>(GetAssetSuffix(packagePath, path));
-                assetMapping.Add(path, targer);
+                if (targer != null)
+                {
+                    assetMapping.Add(path, targer);
+                }
             }
             return targer;
         }
@@ -30,6 +32,10 @@ namespace AssetSystem
         public override Object[] LoadAll()
         {
             Object[] assets = AssetDatabase.LoadAllAssetsAtPath(packagePath);
+            if (assets == null)
+            {
+                return null;
+            }
             foreach (Object asset in assets)
             {
                 string path = packagePath + asset.name;
@@ -109,16 +115,21 @@ namespace AssetSystem
             {
                 return assetPath;
             }
-            var files = Directory.GetFiles(packagePath.Replace("assets", Application.dataPath), Path.GetFileName(assetPath) + ".*");
-            if (files != null)
+            string dir = packagePath.Replace("assets", Application.dataPath);
+            if (Directory.Exists(dir))
             {
-                string suffixPath = assetPath + "." + Path.GetFileName(files.Where(s => !s.EndsWith(".meta")).First()).Split('.')[1];
-                return suffixPath;
+                var files = Directory.GetFiles(dir, Path.GetFileName(assetPath) + ".*");
+                if (files != null)
+                {
+                    string suffixPath = assetPath + "." + Path.GetFileName(files.Where(s => !s.EndsWith(".meta")).First()).Split('.')[1];
+                    return suffixPath;
+                }
+                else
+                {
+                    return assetPath;
+                }
             }
-            else
-            {
-                return assetPath;
-            }
+            return assetPath;
         }
 
         public override bool Exist(string path)

@@ -113,7 +113,9 @@ namespace AssetSystem
         public virtual string GetBundlePlatformRuntime()
         {
             string path = "Bundle";
-#if UNITY_EDITOR
+#if UNITY_EDITOR && !UNITY_STANDALONE
+            path = GetBundlePlatformOutput(UnityEditor.EditorUserBuildSettings.activeBuildTarget);
+#elif UNITY_STANDALONE
             path = "Windows";
 #elif UNITY_ANDROID
             path = "Android";

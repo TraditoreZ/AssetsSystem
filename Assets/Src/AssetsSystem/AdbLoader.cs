@@ -97,6 +97,13 @@ namespace AssetSystem
             return path.Substring(0, path.LastIndexOf('/'));
         }
 
+        public override bool ExistAsset(string path)
+        {
+            path = CombinePath(root, path);
+            string packagePath = GetPackageName(path);
+            return LoadPackage(packagePath).Exist(path);
+        }
+
         protected override IAssetPackage CreatePackage() { return AdbPackage.CreateObject(); }
 
         protected override void DestoryPackage(IAssetPackage package) { AdbPackage.ReclaimObject(package as AdbPackage); }
