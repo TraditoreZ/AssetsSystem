@@ -41,13 +41,19 @@ namespace AssetSystem
         }
 
 
-        public static AssetBundleMatchInfo MatchAssets(string path, AssetBundleRule rule)
+        public static AssetBundleMatchInfo MatchAssets(string path, AssetBundleRule rule, bool allowIgnoreSuffix = true)
         {
             // 路径小写处理
             path = path.ToLower();
-            if (Regex.IsMatch(path, rule.expression))
+            // 如果传入路径没有后缀， 表达式也要相应删掉后缀匹配部分
+            string ruleExpression = rule.expression;
+            if (!Regex.IsMatch(path, @".+\..+$") && allowIgnoreSuffix)
             {
-                var match = Regex.Match(path, rule.expression);
+                ruleExpression = Regex.Replace(ruleExpression, @"(\\\..*)$", "");
+            }
+            if (Regex.IsMatch(path, ruleExpression))
+            {
+                var match = Regex.Match(path, ruleExpression);
                 string packName = rule.packName;
                 if (match.Groups.Count > 1)
                 {

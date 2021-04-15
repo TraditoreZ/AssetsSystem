@@ -23,7 +23,12 @@ namespace AssetSystem
         public override Object Load(string path)
         {
             path = CombinePath(root, path);
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            if (!Path2Package(path, out packagePath))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + path);
+                return null;
+            }
             return LoadPackage(packagePath).Load(path);
         }
 
@@ -37,7 +42,13 @@ namespace AssetSystem
         public override void LoadAsync(string path, Action<Object> callback)
         {
             path = CombinePath(root, path);
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            if (!Path2Package(path, out packagePath))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + path);
+                callback?.Invoke(null);
+                return;
+            }
             LoadPackage(packagePath).LoadAsync(path, callback);
         }
 
@@ -50,7 +61,12 @@ namespace AssetSystem
         public override void Unload(string path)
         {
             path = CombinePath(root, path);
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            if (!Path2Package(path, out packagePath))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + path);
+                return;
+            }
             if (packMapping.ContainsKey(packagePath))
             {
                 IAssetPackage package = LoadPackage(packagePath);
@@ -92,15 +108,21 @@ namespace AssetSystem
             }
         }
 
-        public override string GetPackageName(string path)
+        public override bool Path2Package(string path, out string packageName)
         {
-            return path.Substring(0, path.LastIndexOf('/'));
+            packageName = path.Substring(0, path.LastIndexOf('/'));
+            return File.Exists(packageName);
         }
 
         public override bool ExistAsset(string path)
         {
             path = CombinePath(root, path);
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            if (!Path2Package(path, out packagePath))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + path);
+                return false;
+            }
             return LoadPackage(packagePath).Exist(path);
         }
 

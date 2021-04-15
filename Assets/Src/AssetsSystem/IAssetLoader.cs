@@ -18,7 +18,7 @@ namespace AssetSystem
         void Unload(string path);
         void Unload(Object obj);
         void UnloadAll(string packagePath);
-        string GetPackageName(string path);
+        bool Path2Package(string path, out string packageName);
         bool ExistAsset(string path);
     }
 
@@ -123,11 +123,16 @@ namespace AssetSystem
 
         protected abstract void DestoryPackage(IAssetPackage package);
 
-        public abstract string GetPackageName(string path);
+        public abstract bool Path2Package(string path, out string packageName);
 
         public virtual bool ExistAsset(string path)
         {
-            return LoadPackage(GetPackageName(path)).Exist(path);
+            string packageName;
+            if (Path2Package(path, out packageName))
+            {
+                return LoadPackage(packageName).Exist(path);
+            }
+            return false;
         }
 
     }

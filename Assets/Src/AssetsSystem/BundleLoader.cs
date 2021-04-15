@@ -6,6 +6,8 @@ using System.IO;
 using Object = UnityEngine.Object;
 using AssetSystem;
 using System.Linq;
+using System.Text.RegularExpressions;
+
 namespace AssetSystem
 {
     internal class BundleLoader : BaseAssetLoader
@@ -28,7 +30,12 @@ namespace AssetSystem
 
         public override Object Load(string path)
         {
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            if (!Path2Package(path, out packagePath))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + path);
+                return null;
+            }
             string[] deps = allManifest.GetAllDependencies(packagePath);
             foreach (var dep in deps)
             {
@@ -49,7 +56,13 @@ namespace AssetSystem
 
         public override void LoadAsync(string path, Action<Object> callback)
         {
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            if (!Path2Package(path, out packagePath))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + path);
+                callback?.Invoke(null);
+                return;
+            }
             string[] deps = allManifest.GetAllDependencies(packagePath);
             if (deps.Length > 0)
             {
@@ -150,7 +163,12 @@ namespace AssetSystem
 
         public override void Unload(string path)
         {
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            if (!Path2Package(path, out packagePath))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + path);
+                return;
+            }
             if (packMapping.ContainsKey(packagePath))
             {
                 LoadPackage(packagePath).Unload(path);
@@ -201,24 +219,22 @@ namespace AssetSystem
             base.Destory();
         }
 
-        public override string GetPackageName(string path)
+        public override bool Path2Package(string path, out string packageName)
         {
+            packageName = string.Empty;
             //如果路径包含Asset根目录， 则不进行根目录合并
             string fullPath = path.IndexOf("assets/") >= 0 ? path : CombinePath(root, path);
-            //如果路径不含有后缀, 自动填入一个任何后缀格式
-            if (!System.Text.RegularExpressions.Regex.IsMatch(path, @".+\..+$"))
-                fullPath = fullPath + ".*";
-            // 根据需求可以考虑缓存
             foreach (var rule in rules)
             {
                 var matchInfo = AssetBundleBuildConfig.MatchAssets(fullPath, rule);
                 if (matchInfo != null)
                 {
-                    return matchInfo.packName;
+                    packageName = matchInfo.packName;
+                    return true;
                 }
             }
             Debug.LogError("GetPackageName Fall:" + path);
-            return string.Empty;
+            return false;
         }
 
         private string CombinePath(string p1, string p2)

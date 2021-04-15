@@ -147,16 +147,28 @@ namespace AssetSystem
 
         public string LoadScene(string scenePath)
         {
-            string scenePackage = m_Loader.GetPackageName(scenePath);
-            Debug.Log(scenePackage);
-            m_Loader.LoadAllRefPackage(scenePackage.ToLower());
+            scenePath = scenePath.ToLower();
+            string scenePackage;
+            if (!m_Loader.Path2Package(scenePath, out scenePackage))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + scenePath);
+                return string.Empty;
+            }
+            m_Loader.LoadAllRefPackage(scenePackage);
             return GetSceneNameByPath(scenePath);
         }
 
         public void LoadSceneAsync(string scenePath, Action<string> callback)
         {
-            string scenePackage = m_Loader.GetPackageName(scenePath);
-            m_Loader.LoadAllRefPackageAsync(scenePackage.ToLower(), (ok) =>
+            scenePath = scenePath.ToLower();
+            string scenePackage;
+            if (!m_Loader.Path2Package(scenePath, out scenePackage))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + scenePath);
+                callback?.Invoke(string.Empty);
+                return;
+            }
+            m_Loader.LoadAllRefPackageAsync(scenePackage, (ok) =>
             {
                 callback?.Invoke(GetSceneNameByPath(scenePath));
                 if (!ok)
@@ -190,14 +202,19 @@ namespace AssetSystem
 
         public void UnloadScene(string scenePath)
         {
-            string scenePackage = m_Loader.GetPackageName(scenePath);
-            m_Loader.UnloadAll(scenePackage.ToLower());
+            scenePath = scenePath.ToLower();
+            string scenePackage;
+            if (!m_Loader.Path2Package(scenePath, out scenePackage))
+            {
+                Debug.LogError("AssetSystem  Assetpath to Package Error:" + scenePath);
+                return;
+            }
+            m_Loader.UnloadAll(scenePackage);
         }
 
         private string GetSceneNameByPath(string scenePath)
         {
-            int index = scenePath.LastIndexOf('/');
-            return index >= 0 ? scenePath.Substring(index + 1, scenePath.Length - index - 1) : scenePath;
+            return System.Text.RegularExpressions.Regex.Replace(scenePath, @".+/", "");
         }
 
     }

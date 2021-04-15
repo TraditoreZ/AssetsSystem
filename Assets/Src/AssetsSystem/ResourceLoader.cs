@@ -20,7 +20,8 @@ namespace AssetSystem
 
         public override Object Load(string path)
         {
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            Path2Package(path, out packagePath);
             return LoadPackage(packagePath).Load(path);
         }
 
@@ -32,7 +33,8 @@ namespace AssetSystem
 
         public override void LoadAsync(string path, Action<Object> callback)
         {
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            Path2Package(path, out packagePath);
             LoadPackage(packagePath).LoadAsync(path, callback);
         }
 
@@ -43,7 +45,8 @@ namespace AssetSystem
 
         public override void Unload(string path)
         {
-            string packagePath = GetPackageName(path);
+            string packagePath;
+            Path2Package(path, out packagePath);
             if (packMapping.ContainsKey(packagePath))
             {
                 IAssetPackage package = LoadPackage(packagePath);
@@ -84,9 +87,10 @@ namespace AssetSystem
             }
         }
 
-        public override string GetPackageName(string path)
+        public override bool Path2Package(string path, out string packageName)
         {
-            return path.Substring(0, path.LastIndexOf('/'));
+            packageName = path.Substring(0, path.LastIndexOf('/'));
+            return true;
         }
 
         protected override IAssetPackage CreatePackage() { return ResourcePackage.CreateObject(); }

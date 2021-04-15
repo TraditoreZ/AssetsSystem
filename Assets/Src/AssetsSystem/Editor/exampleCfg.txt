@@ -17,7 +17,7 @@ Assets/Res/Shaders/(.+/)?.+ => main_shaders : immortal
 //Assets/Editor/External/NGUI/Resources/Shaders/.+.shader => NGUI_default_shaders : explicit | immortal
 //===================================================================
 // 角色相关测试
-Assets/Res/Actor/(.+?)/.+ => {0}_prefab
+Assets/Res/Actor/(.+?)/.+\.prefab => {0}_prefab
 //Assets/GameAssets/Actor/(.+?)/.+ => {0}_prefab
 //Assets/GameAssets/Actor/.+/(.+?)/.+ => {0}_prefab
 //Assets/GameAssets/Actor/(.+?)/.+ => Actor_prefab
