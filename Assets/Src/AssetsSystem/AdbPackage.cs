@@ -15,7 +15,6 @@ namespace AssetSystem
         // AssetDataBase为虚拟包概念
         private HashSet<string> asyncLoading = new HashSet<string>();
         private Dictionary<string, HashSet<Action<Object>>> singleCallBackDic = new Dictionary<string, HashSet<Action<Object>>>();
-
         public override Object Load(string path)
         {
             Object targer;
@@ -44,27 +43,26 @@ namespace AssetSystem
 
         public override void LoadAsync(string path, Action<Object> callback)
         {
-            AssetSystemCore.Instance.StartCoroutine(IELoadAsync(path, callback));
+            AssetSystemCore.Instance.StartCoroutine(SimulateAsync(path, callback));
         }
 
-        private IEnumerator IELoadAsync(string path, Action<Object> callback)
+        private IEnumerator SimulateAsync(string path, Action<Object> callback)
         {
-            // Editor下模拟延迟
-            yield return new WaitForSeconds(AssetSystemCore.Instance.SimulateIODelay ? UnityEngine.Random.Range(0, 1f) : 0);
+            // Editor下模拟 加载延迟
+            if (assetMapping.ContainsKey(path))
+            {
+                callback?.Invoke(assetMapping[path]);
+                yield break;
+            }
+            yield return new WaitForSeconds(AssetSystemCore.Instance.SimulateIODelay ? UnityEngine.Random.Range(0, 0.5f) : 0);
             callback?.Invoke(Load(path));
         }
 
         public override void LoadAllAsync(Action<Object[]> callback)
         {
-            AssetSystemCore.Instance.StartCoroutine(IELoadAllAsync(callback));
-        }
-
-        private IEnumerator IELoadAllAsync(Action<Object[]> callback)
-        {
-            // Editor下模拟延迟
-            yield return new WaitForSeconds(AssetSystemCore.Instance.SimulateIODelay ? UnityEngine.Random.Range(0, 1f) : 0);
             callback?.Invoke(LoadAll());
         }
+
 
         public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
@@ -107,7 +105,11 @@ namespace AssetSystem
 
         private string GetAssetSuffix(string packagePath, string assetPath)
         {
-            var files = Directory.GetFiles(packagePath.Replace("Assets", Application.dataPath), Path.GetFileName(assetPath) + ".*");
+            if (System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(assetPath), @".+\..+$"))
+            {
+                return assetPath;
+            }
+            var files = Directory.GetFiles(packagePath.Replace("assets", Application.dataPath), Path.GetFileName(assetPath) + ".*");
             if (files != null)
             {
                 string suffixPath = assetPath + "." + Path.GetFileName(files.Where(s => !s.EndsWith(".meta")).First()).Split('.')[1];
@@ -117,6 +119,11 @@ namespace AssetSystem
             {
                 return assetPath;
             }
+        }
+
+        public override bool Exist(string path)
+        {
+            return Load(path) != null;
         }
 
     }

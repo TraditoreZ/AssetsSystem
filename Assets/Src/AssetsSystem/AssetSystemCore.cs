@@ -166,6 +166,11 @@ namespace AssetSystem
             });
         }
 
+        public bool ExistAsset(string path)
+        {
+            return m_Loader.ExistAsset(path);
+        }
+
         public void Unload(string path)
         {
             m_Loader.Unload(path.ToLower());

@@ -22,6 +22,7 @@ namespace AssetSystem
         void UnloadAll();
         bool IsLoaded(string path);
         int LoadCount();
+        bool Exist(string path);
     }
 
 
@@ -79,6 +80,7 @@ namespace AssetSystem
             UnloadAll();
         }
 
+        public abstract bool Exist(string path);
 
     }
 }

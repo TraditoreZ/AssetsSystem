@@ -125,5 +125,11 @@ namespace AssetSystem
         {
             return string.Format("{0}/{1}", packagePath, assetName);
         }
+
+        public override bool Exist(string path)
+        {
+            return Load(path) != null;
+        }
+        
     }
 }

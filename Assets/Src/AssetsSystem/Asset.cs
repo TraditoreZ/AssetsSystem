@@ -79,6 +79,11 @@ namespace AssetSystem
             core.LoadSceneAsync(scenePath, callback);
         }
 
+        public static bool ExistAsset(string path)
+        {
+            return core.ExistAsset(path);
+        }
+
         public static void Unload(string path)
         {
             core.Unload(path);

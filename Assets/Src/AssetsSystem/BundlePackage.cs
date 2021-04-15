@@ -12,6 +12,7 @@ namespace AssetSystem
         private AssetBundle m_AssetBundle;
         private Dictionary<string, Object> _assetRef = new Dictionary<string, Object>();
         private HashSet<string> _packageRef = new HashSet<string>();
+        private HashSet<string> _bundleAssets = new HashSet<string>();
         private Dictionary<string, Queue<Action<Object>>> asyncCallLists = new Dictionary<string, Queue<Action<Object>>>();
         private Queue<Action<Object[]>> asyncAllCallLists = new Queue<Action<Object[]>>();
         private bool isStreamedSceneAssetBundle;
@@ -30,6 +31,7 @@ namespace AssetSystem
                 if (m_AssetBundle != null)
                 {
                     isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
+                    MappingAssetsName();
                 }
                 else
                 {
@@ -49,6 +51,7 @@ namespace AssetSystem
                 {
                     m_AssetBundle = req.assetBundle;
                     isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
+                    MappingAssetsName();
                 }
                 else
                 {
@@ -277,7 +280,27 @@ namespace AssetSystem
             m_AssetBundle.Unload(true);
             _packageRef.Clear();
             _assetRef.Clear();
+            _bundleAssets.Clear();
             m_AssetBundle = null;
         }
+
+        public override bool Exist(string path)
+        {
+            return _bundleAssets.Contains(path);
+        }
+
+        private void MappingAssetsName()
+        {
+            _bundleAssets.Clear();
+            if (m_AssetBundle != null)
+            {
+                string[] assets = m_AssetBundle.isStreamedSceneAssetBundle ? m_AssetBundle.GetAllScenePaths() : m_AssetBundle.GetAllAssetNames();
+                foreach (string asset in assets)
+                {
+                    _bundleAssets.Add(asset);
+                }
+            }
+        }
+
     }
 }

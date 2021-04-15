@@ -103,7 +103,7 @@ namespace AssetSystem
 
         private string CombinePath(string p1, string p2)
         {
-            return System.IO.Path.Combine(p1, p2).Replace('\\', '/');
+            return p2.Contains("assets") ? p2.Replace('\\', '/') : System.IO.Path.Combine(p1, p2).Replace('\\', '/');
         }
 
     }
