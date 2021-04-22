@@ -128,7 +128,12 @@ namespace AssetSystem
                 // 正则表达式
                 tempRule.expression = cmds[0];
                 // 包名
-                tempRule.packName = cmds[1];
+                string packageName = cmds[1];
+                if (!Regex.IsMatch(packageName, @".+/.+\.asset$"))
+                {
+                    packageName += ".asset";
+                }
+                tempRule.packName = packageName;
                 // 参数
                 if (cmds.Length == 3)
                 {
