@@ -12,7 +12,7 @@ public class GameMain : MonoBehaviour
     {
         Asset.Initialize("Assets", LoadType.AssetBundle);
         //AssetSystemCore.Instance.Initialize("", LoadType.Resource);
-        //AssetSystemCore.Instance.Initialize("Assets/Resources", LoadType.AssetDatabase);
+        //AssetSystemCore.Instance.Initialize("Assets", LoadType.AssetDatabase);
     }
 
     // Update is called once per frame
@@ -60,20 +60,25 @@ public class GameMain : MonoBehaviour
             Asset.UnloadAll("Res/2001_player_wumingdj_prefab");
         }
 
-        if (GUILayout.Button("同步加载场景"))
+        if (GUILayout.Button("判断资源是否存在"))
         {
-            string name = Asset.LoadScene("Scenes/test");
-            Debug.Log("scene:" + name);
-            SceneManager.LoadScene(name);
+            Debug.Log(Asset.ExistAsset("Res/Actor/2001_player_wumingdj/2001_player_wumingdj"));
         }
 
-        if (GUILayout.Button("异步加载场景"))
-        {
-            Asset.LoadSceneAsync("Scenes/test", (scene) =>
-            {
-                SceneManager.LoadScene(scene);
-            });
-        }
+        // if (GUILayout.Button("同步加载场景"))
+        // {
+        //     string name = Asset.LoadScene("Scenes/test");
+        //     Debug.Log("scene:" + name);
+        //     SceneManager.LoadScene(name);
+        // }
+
+        // if (GUILayout.Button("异步加载场景"))
+        // {
+        //     Asset.LoadSceneAsync("Scenes/test", (scene) =>
+        //     {
+        //         SceneManager.LoadScene(scene);
+        //     });
+        // }
 
 
     }
