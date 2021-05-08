@@ -27,7 +27,7 @@ namespace AssetSystem
         }
 
         /// <summary>
-        /// AB 保存的路径相对于 Assets/StreamingAssets 的名字
+        /// AB 保存的路径的名字
         /// </summary>
         public virtual string BundleSaveDirName { get { return "AssetBundles"; } }
         /// <summary>

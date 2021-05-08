@@ -24,7 +24,7 @@ namespace AssetEditor
             {
                 System.IO.Directory.CreateDirectory(GetOutDataPath(buildTarget));
             }
-            File.Copy(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)), Path.Combine(GetOutDataPath(buildTarget), GetManifestName(version)), true);
+            File.Copy(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)), Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version)), true);
         }
 
         public static void BuildAssetBundle(BuildTarget buildTarget, bool increment)
@@ -42,10 +42,10 @@ namespace AssetEditor
             BuildAssetBundle(data.configPath, data.options, buildTarget, increment);
         }
 
-        public static void AssetHashCheck(BuildTarget buildTarget, string currtVersion, string sourceVersion)
+        public static void GenerateModifyList(BuildTarget buildTarget, string currtVersion, string sourceVersion)
         {
-            string sourcePath = Path.Combine(GetOutDataPath(buildTarget), GetManifestName(sourceVersion));
-            string currtPath = Path.Combine(GetOutDataPath(buildTarget), GetManifestName(currtVersion));
+            string sourcePath = Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(sourceVersion));
+            string currtPath = Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(currtVersion));
             if (!System.IO.File.Exists(currtPath))
             {
                 throw new System.Exception("Not find: " + currtPath);
@@ -54,24 +54,11 @@ namespace AssetEditor
             {
                 throw new System.Exception("Not find: " + sourcePath);
             }
-            AssetBundle oldManifestBundle = AssetBundle.LoadFromFile(sourcePath);
-            AssetBundleManifest oldManifest = oldManifestBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-            oldManifestBundle.Unload(false);
-            AssetBundle currtManifestBundle = AssetBundle.LoadFromFile(currtPath);
-            AssetBundleManifest currtManifest = currtManifestBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-            currtManifestBundle.Unload(false);
-            Dictionary<string, string> bundleChangedDic = new Dictionary<string, string>();
-            foreach (var asset in currtManifest.GetAllAssetBundles())
+            Dictionary<string, string> modifyList = null;
+            if (HDResolver.CheckModify(currtPath, sourcePath, out modifyList))
             {
-                if (oldManifest != null && !oldManifest.GetAssetBundleHash(asset).Equals(currtManifest.GetAssetBundleHash(asset)))
-                {
-                    if (!bundleChangedDic.ContainsKey(asset))
-                    {
-                        bundleChangedDic.Add(asset, currtManifest.GetAssetBundleHash(asset).ToString());
-                    }
-                }
+                CreateModifyList(modifyList, buildTarget, Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetModifyListName(currtVersion)));
             }
-            CreateHashCheck(bundleChangedDic, buildTarget, Path.Combine(GetOutDataPath(buildTarget), GetHashTableName(currtVersion)));
         }
 
 
@@ -174,31 +161,25 @@ namespace AssetEditor
             return packs;
         }
 
-        static void CreateBundleFrom(Dictionary<string, string> bundleFromDic, BuildTarget buildTarget)
-        {
-            using (StreamWriter sw = new StreamWriter(Path.Combine(GetOutPath(buildTarget), cfg_AllBundleMD5), false))
-            {
-                foreach (var data in bundleFromDic)
-                {
-                    string command = string.Format("{0}:{1}", data.Key, data.Value);
-                    sw.WriteLine(command);
-                    sw.Flush();
-                    sw.Close();
-                }
-            }
-        }
 
         // hash表单 记录bundle的所有修改 可用于任意时刻切曾量包
-        static void CreateHashCheck(Dictionary<string, string> bundleChangedDic, BuildTarget buildTarget, string outPath)
+        static void CreateModifyList(Dictionary<string, string> bundleChangedDic, BuildTarget buildTarget, string outPath)
         {
-            //Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.instance.BundleBillName)
+            ModifyData modifyJson = new ModifyData();
+            modifyJson.datas = new ModifyData.ModifyCell[bundleChangedDic.Count];
+
+            int index = 0;
+            foreach (var item in bundleChangedDic)
+            {
+                ModifyData.ModifyCell cell = new ModifyData.ModifyCell();
+                modifyJson.datas[index++] = cell;
+                cell.assetName = item.Key;
+                cell.assetHash = item.Value;
+                cell.size = (new System.IO.FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.assetName))).Length;
+            }
             using (StreamWriter sw = new StreamWriter(outPath, false))
             {
-                foreach (var data in bundleChangedDic)
-                {
-                    string command = string.Format("{0}:{1}", data.Key, data.Value);
-                    sw.WriteLine(command);
-                }
+                sw.Write(JsonUtility.ToJson(modifyJson));
                 sw.Flush();
                 sw.Close();
             }
@@ -257,12 +238,15 @@ namespace AssetEditor
             // 复制Bundle
             CopyBundle(GetOutPath(buildTarget), packagePath, true);
             // 复制Mainfest信息
-            if (System.IO.File.Exists(Path.Combine(GetOutDataPath(buildTarget), GetManifestName(version))))
+            if (System.IO.File.Exists(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version))))
             {
-                File.Copy(Path.Combine(GetOutDataPath(buildTarget), GetManifestName(version)), Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget) + "_Data", GetManifestName(version)), true);
+                File.Copy(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version)), Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget) + "_Data", HDResolver.GetManifestName(version)), true);
             }
             // 复制更新表
-
+            if (System.IO.File.Exists(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetModifyListName(version))))
+            {
+                File.Copy(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetModifyListName(version)), Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget) + "_Data", HDResolver.GetModifyListName(version)), true);
+            }
 
             AssetDatabase.Refresh();
         }
@@ -313,15 +297,7 @@ namespace AssetEditor
             return (hour.ToString() + ":" + minute.ToString() + ":" + second.ToString());
         }
 
-        static string GetManifestName(string version)
-        {
-            return version + "_manifest";
-        }
 
-        static string GetHashTableName(string version)
-        {
-            return version + "_hash.cfg";
-        }
 
     }
 }

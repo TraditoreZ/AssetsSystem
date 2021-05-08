@@ -60,7 +60,6 @@ namespace AssetEditor
             editorData.options = (BuildAssetBundleOptions)EditorGUILayout.EnumFlagsField(currentEnum);
 
 
-
             GUILayout.Label("【平台选择】");
             editorData.lastBuildTarger = (BuildTarget)EditorGUILayout.IntPopup("", (int)editorData.lastBuildTarger,
                                     platformName, platformIndexs, GUILayout.MaxWidth(140));
@@ -84,7 +83,7 @@ namespace AssetEditor
                 AssetBuilder.BuildManifest(editorData.version, editorData.lastBuildTarger);
                 if (editorData.increment)
                 {
-                    AssetBuilder.AssetHashCheck(editorData.lastBuildTarger, editorData.version, editorData.sourceVersion);
+                    AssetBuilder.GenerateModifyList(editorData.lastBuildTarger, editorData.version, editorData.sourceVersion);
                     AssetBuilder.Move2Package(editorData.version, editorData.lastBuildTarger, editorData.incrementPath);
                 }
                 else
