@@ -111,7 +111,7 @@ namespace AssetSystem
         public override bool Path2Package(string path, out string packageName)
         {
             packageName = path.Substring(0, path.LastIndexOf('/'));
-            return File.Exists(packageName);
+            return Directory.Exists(packageName);
         }
 
         public override bool ExistAsset(string path)
