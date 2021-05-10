@@ -193,15 +193,15 @@ namespace AssetEditor
             foreach (var rule in rules)
             {
                 var info = AssetBundleBuildConfig.MatchAssets(assetPath, rule);
-                if (info != null)
+                if (info.HasValue)
                 {
                     ABPackage pack = null;
-                    if (!packs.TryGetValue(info.packName, out pack))
+                    if (!packs.TryGetValue(info.Value.packName, out pack))
                     {
                         pack = new ABPackage();
-                        pack.packageName = info.packName;
-                        pack.options = info.options;
-                        packs.Add(info.packName, pack);
+                        pack.packageName = info.Value.packName;
+                        pack.options = info.Value.options;
+                        packs.Add(info.Value.packName, pack);
                     }
                     if (pack.assets.Add(assetPath))
                     {

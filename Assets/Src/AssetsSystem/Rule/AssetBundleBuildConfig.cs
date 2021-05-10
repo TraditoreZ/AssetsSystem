@@ -41,7 +41,7 @@ namespace AssetSystem
         }
 
 
-        public static AssetBundleMatchInfo MatchAssets(string path, AssetBundleRule rule, bool allowIgnoreSuffix = true)
+        public static AssetBundleMatchInfo? MatchAssets(string path, AssetBundleRule rule, bool allowIgnoreSuffix = true)
         {
             // 路径小写处理
             path = path.ToLower();
@@ -64,13 +64,32 @@ namespace AssetSystem
                     }
                     packName = string.Format(rule.packName, format);
                 }
+                // split package
+                for (int i = 0; i < rule.options.Length; i++)
+                {
+                    string option = rule.options[i];
+                    if (option.IndexOf("split_hash") >= 0)
+                    {
+                        int maxPackage = 0;
+                        if (int.TryParse(option.Replace("split_hash", ""), out maxPackage))
+                        {
+                            // 防止 hash为负  做位运算
+                            int packageNumber = (path.GetHashCode() & int.MaxValue) % maxPackage;
+                            packName = packName.Insert(packName.IndexOf('.'), packageNumber.ToString());
+                        }
+                        else
+                        {
+                            Debug.LogError("MatchAssets option Error: [split_hash]  " + option);
+                        }
+                    }
+                }
                 AssetBundleMatchInfo info = new AssetBundleMatchInfo();
                 info.path = path;
                 info.packName = packName;
                 info.options = rule.options;
                 if (rule.subRule.Count > 0)
                 {
-                    AssetBundleMatchInfo subInfo = null;
+                    AssetBundleMatchInfo? subInfo = null;
                     foreach (var sub in rule.subRule)
                     {
                         subInfo = MatchAssets(path, sub);

@@ -227,9 +227,9 @@ namespace AssetSystem
             foreach (var rule in rules)
             {
                 var matchInfo = AssetBundleBuildConfig.MatchAssets(fullPath, rule);
-                if (matchInfo != null)
+                if (matchInfo.HasValue)
                 {
-                    packageName = matchInfo.packName;
+                    packageName = matchInfo.Value.packName;
                     return true;
                 }
             }

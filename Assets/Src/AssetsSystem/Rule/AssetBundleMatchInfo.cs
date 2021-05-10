@@ -1,6 +1,6 @@
 namespace AssetSystem
 {
-    public class AssetBundleMatchInfo
+    public struct AssetBundleMatchInfo
     {
         public string path;
 

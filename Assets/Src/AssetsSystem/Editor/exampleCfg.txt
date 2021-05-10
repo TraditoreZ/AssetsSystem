@@ -1,7 +1,7 @@
 // 场景相关资源
 //====================================================================
-Assets/(map\d+|Login)/.+ => {0}_level_assets : bigbundle // 标记这个包可以超过2M，不标记则会按序号拆开
-Assets/GameAssets/LightMaps/(map\d+)/.+ => {0}_level_assets : bigbundle
+Assets/(map\d+|Login)/.+ => {0}_level_assets : split_hash 10 // 标记这个包根据包名哈希切分成10个子包
+Assets/GameAssets/LightMaps/(map\d+)/.+ => {0}_level_assets : split_hash 5
 {
     //这里可以加上满足父节点匹配后，继续细分的子匹配规则
     Assets/Resources/Shaders/(.+/)?.+ => main_shaders : immortal
@@ -22,7 +22,7 @@ Assets/Res/Actor/(.+?)/.+\.prefab => {0}_prefab
 //Assets/GameAssets/Actor/.+/(.+?)/.+ => {0}_prefab
 //Assets/GameAssets/Actor/(.+?)/.+ => Actor_prefab
 
-Assets/GameAssets/Animation/(.+?)/.+ => {0}_animation
+Assets/GameAssets/Animation/(.+?)/.+ => animation : split_hash 5
 //Assets/Res/Animation/.* => animations
 
 // 场景

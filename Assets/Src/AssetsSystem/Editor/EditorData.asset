@@ -15,7 +15,7 @@ MonoBehaviour:
   configPath: Assets/Src/AssetsSystem/Editor/exampleCfg
   options: 256
   lastBuildTarger: 13
-  increment: 1
-  incrementPath: 
-  version: 1
+  increment: 0
+  incrementPath: E:/AssetsSystem/HotDownload
+  version: 0
   sourceVersion: 0
