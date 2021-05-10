@@ -15,6 +15,7 @@ namespace AssetEditor
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            // unity 2019 无法使用
             MethodInfo miIntToEnumFlags = typeof(EditorGUI).GetMethod("IntToEnumFlags", BindingFlags.Static | BindingFlags.NonPublic);
             Enum currentEnum = miIntToEnumFlags.Invoke(null, new object[] { fieldInfo.FieldType, property.intValue }) as Enum;
             Enum newEnum = EditorGUI.EnumFlagsField(position, label, currentEnum);

@@ -15,7 +15,6 @@ namespace AssetEditor
         {
             //开始之前进行一下检测，Streaming下有没有xml的明文文件，如果没有则生成一个
             AssetBuilderLayout window = (AssetBuilderLayout)EditorWindow.GetWindow(typeof(AssetBuilderLayout));
-            window.editorData = window.GetAssetEditorData();
             // window.minSize = new Vector2(500, 850);
             // window.maxSize = new Vector2(800, 850);
             window.titleContent = new GUIContent("资源管理系统");
@@ -45,7 +44,7 @@ namespace AssetEditor
         public void OnGUI()
         {
             GUILayout.Label("【规则文件路径】");
-            editorData.configPath = EditorGUILayout.TextField("", editorData.configPath, GUILayout.Width(editorData.configPath.Length * 7));
+            editorData.configPath = EditorGUILayout.TextField("", editorData.configPath, GUILayout.Width(editorData.configPath.Length > 0 ? editorData.configPath.Length * 7 : 100));
 
 
             GUILayout.Label("【分包根目录】");
@@ -55,10 +54,10 @@ namespace AssetEditor
                 editorData.incrementPath = EditorUtility.OpenFolderPanel("选择分包根目录", "", "");
             }
             GUILayout.Label("【构建参数】");
-            MethodInfo miIntToEnumFlags = typeof(EditorGUI).GetMethod("IntToEnumFlags", BindingFlags.Static | BindingFlags.NonPublic);
-            Enum currentEnum = miIntToEnumFlags.Invoke(null, new object[] { typeof(BuildAssetBundleOptions), (int)editorData.options }) as Enum;
-            editorData.options = (BuildAssetBundleOptions)EditorGUILayout.EnumFlagsField(currentEnum);
-
+            // MethodInfo miIntToEnumFlags = typeof(EditorGUI).GetMethod("IntToEnumFlags", BindingFlags.Static | BindingFlags.NonPublic);
+            // Enum currentEnum = miIntToEnumFlags.Invoke(null, new object[] { typeof(BuildAssetBundleOptions), (int)editorData.options }) as Enum;
+            // editorData.options = (BuildAssetBundleOptions)EditorGUILayout.EnumFlagsField(currentEnum);
+            editorData.options = (BuildAssetBundleOptions)EditorGUILayout.EnumFlagsField("BuildAssetBundleOptions", editorData.options);
 
             GUILayout.Label("【平台选择】");
             editorData.lastBuildTarger = (BuildTarget)EditorGUILayout.IntPopup("", (int)editorData.lastBuildTarger,
@@ -92,6 +91,23 @@ namespace AssetEditor
                     AssetBuilder.Move2Package(editorData.version, editorData.lastBuildTarger, editorData.incrementPath);
                 }
             }
+        }
+
+        public void OnEnable()
+        {
+            editorData = GetAssetEditorData();
+        }
+
+        public void OnDisable()
+        {
+            EditorUtility.SetDirty(editorData);
+
+        }
+
+        public void OnDestroy()
+        {
+            editorData = null;
+            AssetDatabase.Refresh();
         }
 
     }
