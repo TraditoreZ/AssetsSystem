@@ -78,6 +78,9 @@ namespace AssetSystem
                     case EHotDownloadProgress.DownloadAssets:
                         DownloadAssets(arms[0].ToString(), arms[1] as ModifyData, (int)arms[2]);
                         break;
+                    case EHotDownloadProgress.DownloadManifest:
+                        DownloadManifest(arms[0].ToString());
+                        break;
                     case EHotDownloadProgress.FinishDownload:
                         FinishDownload(arms[0].ToString());
                         break;
@@ -201,7 +204,7 @@ namespace AssetSystem
                     if (nextIndex >= data.datas.Length)
                     {
                         System.IO.File.Delete(GetBreakpointPath(version));
-                        UpdateProcess(EHotDownloadProgress.FinishDownload, version);
+                        UpdateProcess(EHotDownloadProgress.DownloadManifest, version);
                     }
                     else
                     {
@@ -212,6 +215,33 @@ namespace AssetSystem
                 else
                 {
                     ErrorEvent?.Invoke("DownloadAssets Fail");
+                }
+            });
+        }
+
+        void DownloadManifest(string version)
+        {
+            string url = string.Format("{0}/{1}/{2}", remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime(), AssetBundlePathResolver.instance.GetBundlePlatformRuntime());
+            downloader.Download(url, null, (ok, bytes) =>
+            {
+                if (ok)
+                {
+                    if (!System.IO.Directory.Exists(AssetBundlePathResolver.instance.GetBundlePersistentFile()))
+                    {
+                        System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
+                    }
+                    string localPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(AssetBundlePathResolver.instance.GetBundlePlatformRuntime());
+                    using (System.IO.FileStream fs = new System.IO.FileStream(localPath, System.IO.FileMode.Create))
+                    {
+                        fs.Write(bytes, 0, bytes.Length);
+                        fs.Close();
+                    }
+
+                    UpdateProcess(EHotDownloadProgress.FinishDownload, version);
+                }
+                else
+                {
+                    ErrorEvent?.Invoke("DownloadManifest Fail");
                 }
             });
         }

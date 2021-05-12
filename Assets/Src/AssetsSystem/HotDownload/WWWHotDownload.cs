@@ -9,9 +9,8 @@ namespace AssetSystem
 {
     public class WWWHotDownload : IAssetHotDownload
     {
-        private string localVer = "0";
 
-        public void Download(string url, Action<long> process, Action<bool, byte[]> resultCallBack)
+        public virtual void Download(string url, Action<long> process, Action<bool, byte[]> resultCallBack)
         {
             AssetDownload.instance.StartCoroutine(LoadResourceCorotine(url, (bytes) =>
             {
@@ -25,19 +24,19 @@ namespace AssetSystem
             }));
         }
 
-        public string GetLocalVersion()
+        public virtual string GetLocalVersion()
         {
-            return localVer;
+            return PlayerPrefs.GetString("localVersion");
         }
 
-        public void GetRemoteVersion(Action<string> result)
+        public virtual void GetRemoteVersion(Action<string> result)
         {
-            result?.Invoke("1");
+            result?.Invoke("2");
         }
 
-        public void SetLocalVersion(string version)
+        public virtual void SetLocalVersion(string version)
         {
-            localVer = version;
+            PlayerPrefs.SetString("localVersion", version);
         }
 
         private IEnumerator LoadResourceCorotine(string url, Action<byte[]> downloadOverCall, Action<string> errorCall, Action<ulong> downLoadBytes)

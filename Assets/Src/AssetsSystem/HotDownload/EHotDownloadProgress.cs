@@ -11,5 +11,6 @@
         DownloadAssets = 6,
         FinishDownload = 7,
         CheckBreakpoint = 8,
+        DownloadManifest = 9
     }
 }
