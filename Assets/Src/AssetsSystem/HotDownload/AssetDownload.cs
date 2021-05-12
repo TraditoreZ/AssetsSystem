@@ -34,6 +34,8 @@ namespace AssetSystem
         public event DownloadProcessDelegate ProcessEvent;
         public delegate void ErrorDelegate(string error);
         public event ErrorDelegate ErrorEvent;
+        public delegate void HotDownloadOverDelegate();
+        public event HotDownloadOverDelegate HotDownloadOverEvent;
 
         private long downLoadCurrtSize;
         private long downLoadMaxSize;
@@ -86,6 +88,7 @@ namespace AssetSystem
                         break;
                     case EHotDownloadProgress.Over:
                         Debug.Log("ResourceUpdateFinish");
+                        HotDownloadOverEvent?.Invoke();
                         break;
                 }
             }
@@ -100,14 +103,10 @@ namespace AssetSystem
         {
             downloader.GetRemoteVersion((remoteVersion) =>
             {
-                if (downloader.GetLocalVersion().Equals(remoteVersion))
-                {
+                if (downloader.CheckAssetVersion(downloader.GetLocalVersion(), remoteVersion))
                     UpdateProcess(EHotDownloadProgress.Over);
-                }
                 else
-                {
                     UpdateProcess(EHotDownloadProgress.DownloadModifyList, remoteVersion);
-                }
             });
         }
 
@@ -133,26 +132,18 @@ namespace AssetSystem
         void CullingLocalResource(string version, ModifyData data)
         {
             if (HDResolver.CullingLocalResource(ref data))
-            {
                 UpdateProcess(EHotDownloadProgress.CompareAssetHash, version, data);
-            }
             else
-            {
                 ErrorEvent?.Invoke("CullingLocalResource Fail");
-            }
         }
 
 
         void CompareAssetHash(string version, ModifyData data)
         {
             if (HDResolver.IsPersistAssetNeedUpdate(ref data))
-            {
                 UpdateProcess(EHotDownloadProgress.CheckBreakpoint, version, data);
-            }
             else
-            {
                 UpdateProcess(EHotDownloadProgress.FinishDownload, version);
-            }
         }
 
         void CheckBreakpoint(string version, ModifyData data)
@@ -169,11 +160,8 @@ namespace AssetSystem
             }
             downLoadMaxSize = 0;
             for (int i = index; i < data.datas.Length; i++)
-            {
                 downLoadMaxSize += data.datas[i].size;
-            }
             UpdateProcess(EHotDownloadProgress.DownloadAssets, version, data, index);
-
         }
 
 
@@ -236,7 +224,6 @@ namespace AssetSystem
                         fs.Write(bytes, 0, bytes.Length);
                         fs.Close();
                     }
-
                     UpdateProcess(EHotDownloadProgress.FinishDownload, version);
                 }
                 else

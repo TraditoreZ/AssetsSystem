@@ -45,8 +45,16 @@ namespace AssetSystem
             }
             _instance = this;
             DontDestroyOnLoad(this);
+            AssetDownload.instance.HotDownloadOverEvent += OnHotDownloadOver;
         }
 
+        private void OnHotDownloadOver()
+        {
+            if (m_Loader != null)
+            {
+                m_Loader.OnAssetsUpdate();
+            }
+        }
 
         public void Initialize(string root, LoadType _loadType, bool simulateIODelay = false)
         {
@@ -72,6 +80,7 @@ namespace AssetSystem
         void OnDestory()
         {
             m_Loader.Destory();
+            AssetDownload.instance.HotDownloadOverEvent -= OnHotDownloadOver;
         }
 
         public Object Load(string path)

@@ -20,6 +20,7 @@ namespace AssetSystem
         void UnloadAll(string packagePath);
         bool Path2Package(string path, out string packageName);
         bool ExistAsset(string path);
+        void OnAssetsUpdate();
     }
 
 
@@ -135,5 +136,8 @@ namespace AssetSystem
             return false;
         }
 
+        public virtual void OnAssetsUpdate()
+        {
+        }
     }
 }

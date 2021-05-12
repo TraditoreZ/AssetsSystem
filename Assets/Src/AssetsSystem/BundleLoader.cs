@@ -12,19 +12,12 @@ namespace AssetSystem
 {
     internal class BundleLoader : BaseAssetLoader
     {
-        public static AssetBundleManifest allManifest;
         private List<AssetBundleRule> rules;
+        private Dictionary<string, string[]> allDependencies;
         public override void Initialize(string root)
         {
             base.Initialize(root);
-            AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
-            allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-            assetBundle.Unload(false);
-            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
-            string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            ruleAB.Unload(true);
-            rules = new List<AssetBundleRule>();
-            AssetBundleBuildConfig.ResolveRule(rules, commands);
+            InitConfig();
         }
 
 
@@ -37,7 +30,7 @@ namespace AssetSystem
                 Debug.LogError("AssetSystem  Assetpath to Package Error:" + path);
                 return null;
             }
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = GetAllDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -47,7 +40,7 @@ namespace AssetSystem
 
         public override Object[] LoadAll(string packagePath)
         {
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = GetAllDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -64,7 +57,7 @@ namespace AssetSystem
                 callback?.Invoke(null);
                 return;
             }
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = GetAllDependencies(packagePath);
             if (deps.Length > 0)
             {
                 int currtDep = 0;
@@ -94,7 +87,7 @@ namespace AssetSystem
 
         public override void LoadAllAsync(string packagePath, Action<Object[]> callback)
         {
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = GetAllDependencies(packagePath);
             if (deps.Length > 0)
             {
                 int currtDep = 0;
@@ -124,7 +117,7 @@ namespace AssetSystem
 
         public override bool LoadAllRefPackage(string packagePath)
         {
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = GetAllDependencies(packagePath);
             foreach (var dep in deps)
             {
                 (LoadPackage(dep) as BundlePackage).AddPackageRef(packagePath);
@@ -134,7 +127,7 @@ namespace AssetSystem
 
         public override void LoadAllRefPackageAsync(string packagePath, Action<bool> callback)
         {
-            string[] deps = allManifest.GetAllDependencies(packagePath);
+            string[] deps = GetAllDependencies(packagePath);
             if (deps.Length > 0)
             {
                 int currtDep = 0;
@@ -238,6 +231,12 @@ namespace AssetSystem
             return false;
         }
 
+        public override void OnAssetsUpdate()
+        {
+            base.OnAssetsUpdate();
+            InitConfig();
+        }
+
         private string CombinePath(string p1, string p2)
         {
             return System.IO.Path.Combine(p1, p2).Replace('\\', '/');
@@ -253,7 +252,7 @@ namespace AssetSystem
             BundlePackage rp = LoadPackage(packagePath) as BundlePackage;
             if (!rp.CheckSelfRef())
             {
-                string[] deps = allManifest.GetAllDependencies(packagePath);
+                string[] deps = GetAllDependencies(packagePath);
                 foreach (var dep in deps)
                 {
                     if (packMapping.ContainsKey(dep))
@@ -282,6 +281,39 @@ namespace AssetSystem
                     UnloadPackage(packagePath);
                 }
             }
+        }
+
+        private readonly string[] emptyArray = new string[] { };
+
+        private string[] GetAllDependencies(string assetBundleName)
+        {
+            string[] values;
+            if (allDependencies.TryGetValue(assetBundleName, out values))
+            {
+                return values;
+            }
+            else
+            {
+                return emptyArray;
+            }
+        }
+
+        private void InitConfig()
+        {
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
+            AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            allDependencies = new Dictionary<string, string[]>();
+            var bundles = allManifest.GetAllAssetBundles();
+            foreach (var bundle in bundles)
+            {
+                allDependencies.Add(bundle, allManifest.GetAllDependencies(bundle));
+            }
+            assetBundle.Unload(true);
+            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
+            string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            ruleAB.Unload(true);
+            rules = new List<AssetBundleRule>();
+            AssetBundleBuildConfig.ResolveRule(rules, commands);
         }
 
     }

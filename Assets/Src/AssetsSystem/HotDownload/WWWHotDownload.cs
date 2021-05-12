@@ -10,6 +10,11 @@ namespace AssetSystem
     public class WWWHotDownload : IAssetHotDownload
     {
 
+        public virtual bool CheckAssetVersion(string localVersion, string remoteVersion)
+        {
+            return localVersion.Equals(remoteVersion);
+        }
+
         public virtual void Download(string url, Action<long> process, Action<bool, byte[]> resultCallBack)
         {
             AssetDownload.instance.StartCoroutine(LoadResourceCorotine(url, (bytes) =>
