@@ -13,6 +13,13 @@ public class GameMain : MonoBehaviour
         Asset.Initialize("Assets", LoadType.AssetBundle);
         //AssetSystemCore.Instance.Initialize("", LoadType.Resource);
         //AssetSystemCore.Instance.Initialize("Assets", LoadType.AssetDatabase);
+
+        AssetDownload.instance.ProcessEvent += ProcessCallBack;
+    }
+
+    private void ProcessCallBack(long currtSize, long maxSize, int index, int count)
+    {
+        Debug.Log(string.Format("[{0}/{1}]      {2}kb/{3}kb     {4:f2}%", index, count, currtSize / 1024, maxSize / 1024, ((float)currtSize / maxSize) * 100));
     }
 
     // Update is called once per frame
@@ -65,6 +72,11 @@ public class GameMain : MonoBehaviour
             Debug.Log(Asset.ExistAsset("Res/Actor/2001_player_wumingdj/2001_player_wumingdj"));
         }
 
+
+        if (GUILayout.Button("热更新"))
+        {
+            AssetDownload.ResourceUpdateOnRemote(@"E:\AssetsSystem\HotDownload", new WWWHotDownload());
+        }
         // if (GUILayout.Button("同步加载场景"))
         // {
         //     string name = Asset.LoadScene("Scenes/test");

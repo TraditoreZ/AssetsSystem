@@ -173,9 +173,9 @@ namespace AssetEditor
             {
                 ModifyData.ModifyCell cell = new ModifyData.ModifyCell();
                 modifyJson.datas[index++] = cell;
-                cell.assetName = item.Key;
-                cell.assetHash = item.Value;
-                cell.size = (new System.IO.FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.assetName))).Length;
+                cell.name = item.Key;
+                cell.hash = item.Value;
+                cell.size = (new System.IO.FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name))).Length;
             }
             using (StreamWriter sw = new StreamWriter(outPath, false))
             {

@@ -1,8 +1,15 @@
-﻿
-
-public enum EHotDownloadProgress
+﻿namespace AssetSystem
 {
-    None = 0,
-    CheckAssetVersion = 1,
-    DownloadModifyList = 2
+    public enum EHotDownloadProgress
+    {
+        None = 0,
+        Over = 1,
+        CheckAssetVersion = 2,
+        DownloadModifyList = 3,
+        CullingLocalResource = 4,
+        CompareAssetHash = 5,
+        DownloadAssets = 6,
+        FinishDownload = 7,
+        CheckBreakpoint = 8,
+    }
 }

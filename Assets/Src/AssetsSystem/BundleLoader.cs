@@ -19,6 +19,7 @@ namespace AssetSystem
             base.Initialize(root);
             AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
             allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            assetBundle.Unload(false);
             AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
             string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             ruleAB.Unload(true);

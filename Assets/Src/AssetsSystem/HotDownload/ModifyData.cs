@@ -1,15 +1,18 @@
 ﻿using System;
-[Serializable]
-public class ModifyData
+namespace AssetSystem
 {
     [Serializable]
-    public class ModifyCell
+    public class ModifyData
     {
-        public string assetName;
-        public string assetHash;
-        public long size;
+        [Serializable]
+        public class ModifyCell
+        {
+            public string name;
+            public string hash;
+            public long size;
+        }
+
+        public ModifyCell[] datas;
+
     }
-
-    public ModifyCell[] datas;
-
 }
