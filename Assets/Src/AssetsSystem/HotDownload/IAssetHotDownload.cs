@@ -11,9 +11,11 @@ namespace AssetSystem
 
         void SetLocalVersion(string version);
 
-        bool CheckAssetVersion(string localVersion, string remoteVersion);
+        bool CheckRemoteVersion(string localVersion, string remoteVersion);
 
-        string GetLocalVersion();
+        void GetLocalVersion(Action<string> result);
+        // 接口返回是否保留Persistent下资源 可用于新包删除旧的缓存资源
+        bool CheckPersistentResource();
 
         void Download(string url, Action<long> process, Action<bool, byte[]> resultCallBack);
 

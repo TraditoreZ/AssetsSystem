@@ -82,11 +82,13 @@ namespace AssetEditor
                 AssetBuilder.BuildManifest(editorData.version, editorData.lastBuildTarger);
                 if (editorData.increment)
                 {
+                    AssetBuilder.CreateAssetVersion(editorData.lastBuildTarger, editorData.version);
                     AssetBuilder.GenerateModifyList(editorData.lastBuildTarger, editorData.version, editorData.sourceVersion);
                     AssetBuilder.Move2Package(editorData.version, editorData.lastBuildTarger, editorData.incrementPath);
                 }
                 else
                 {
+                    AssetBuilder.CreateAssetVersion(editorData.lastBuildTarger, editorData.version);
                     AssetBuilder.Move2Project(editorData.lastBuildTarger);
                     AssetBuilder.Move2Package(editorData.version, editorData.lastBuildTarger, editorData.incrementPath);
                 }

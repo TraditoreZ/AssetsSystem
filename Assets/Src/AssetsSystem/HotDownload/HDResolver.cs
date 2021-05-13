@@ -124,5 +124,23 @@ namespace AssetSystem
         }
 
 
+        public static void WriteFile(string path, string data)
+        {
+            using (StreamWriter sw = new StreamWriter(path, false))
+            {
+                sw.Write(data);
+                sw.Flush();
+                sw.Close();
+            }
+        }
+
+        public static string ReadFile(string path)
+        {
+            using (StreamReader sr = new StreamReader(path))
+            {
+                return sr.ReadToEnd();
+            }
+        }
+
     }
 }

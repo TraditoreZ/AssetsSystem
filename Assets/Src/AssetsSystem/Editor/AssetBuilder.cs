@@ -109,37 +109,13 @@ namespace AssetEditor
                 configABB.assetBundleName = "bundle.rule";
                 configABB.assetNames = new string[] { configPath.EndsWith(".txt") ? configPath : configPath + ".txt" };
                 abbLists.Add(configABB);
-                //oldManifest 为母包 Manifest
-                // AssetBundleManifest oldManifest = null;
-                // if (File.Exists(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget))))
-                // {
-                //     AssetBundle oldManifestBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)));
-                //     oldManifest = oldManifestBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-                // }
+
                 watch.Reset();
                 watch.Start();
                 BuildPipeline.BuildAssetBundles(GetOutPath(buildTarget), abbLists.ToArray(), options, buildTarget);
                 watch.Stop();
                 Debug.Log("BuildAssetBundles Time:" + RevertToTime(watch.ElapsedMilliseconds));
 
-                // Dictionary<string, string> bundleFromDic = new Dictionary<string, string>();
-                // Dictionary<string, string> bundleChangedDic = new Dictionary<string, string>();
-                // foreach (var asset in manifest.GetAllAssetBundles())
-                // {
-                //     if (!bundleFromDic.ContainsKey(asset))
-                //     {
-                //         bundleFromDic.Add(asset, manifest.GetAssetBundleHash(asset).ToString());
-                //     }
-                //     if (oldManifest != null && !oldManifest.GetAssetBundleHash(asset).Equals(manifest.GetAssetBundleHash(asset)))
-                //     {
-                //         if (!bundleChangedDic.ContainsKey(asset))
-                //         {
-                //             bundleChangedDic.Add(asset, manifest.GetAssetBundleHash(asset).ToString());
-                //         }
-                //     }
-                // }
-                // CreateBundleFrom(bundleFromDic, buildTarget);
-                // CreateHashCheck(bundleChangedDic, buildTarget);
             }
             finally
             {
@@ -247,8 +223,13 @@ namespace AssetEditor
             {
                 File.Copy(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetModifyListName(version)), Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget) + "_Data", HDResolver.GetModifyListName(version)), true);
             }
-
             AssetDatabase.Refresh();
+        }
+
+        public static void CreateAssetVersion(BuildTarget buildTarget, string version)
+        {
+            string outPath = Path.Combine(GetOutPath(buildTarget), "version.txt");
+            HDResolver.WriteFile(outPath, version);
         }
 
         static void CopyBundle(string srcdir, string dstdir, bool overwrite)

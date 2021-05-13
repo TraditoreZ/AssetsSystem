@@ -30,7 +30,7 @@ namespace AssetSystem
 
         public delegate void DownloadDelegate(EHotDownloadProgress progress);
         public event DownloadDelegate DownloadEvent;
-        public delegate void DownloadProcessDelegate(long currtSize, long maxSize, int index, int count);
+        public delegate void DownloadProcessDelegate(string assetName, long currtSize, long maxSize, int index, int count);
         public event DownloadProcessDelegate ProcessEvent;
         public delegate void ErrorDelegate(string error);
         public event ErrorDelegate ErrorEvent;
@@ -51,19 +51,26 @@ namespace AssetSystem
         {
             instance.downloader = assetHotDownload;
             instance.m_remoteUrl = remoteUrl;
-            instance.UpdateProcess(EHotDownloadProgress.CheckAssetVersion);
+            if (!System.IO.Directory.Exists(AssetBundlePathResolver.instance.GetBundlePersistentFile()))
+                System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
+            instance.UpdateProcess(EHotDownloadProgress.CheckPersistentResource);
         }
 
         void UpdateProcess(EHotDownloadProgress progress, params object[] arms)
         {
-            Debug.Log("[AssetDownload] => " + progress);
             DownloadEvent?.Invoke(progress);
             try
             {
                 switch (progress)
                 {
-                    case EHotDownloadProgress.CheckAssetVersion:
-                        CheckAssetVersion();
+                    case EHotDownloadProgress.CheckPersistentResource:
+                        CheckPersistentResource();
+                        break;
+                    case EHotDownloadProgress.ClearPersistentResource:
+                        ClearPersistentResource();
+                        break;
+                    case EHotDownloadProgress.CheckRemoteVersion:
+                        CheckRemoteVersion();
                         break;
                     case EHotDownloadProgress.CheckBreakpoint:
                         CheckBreakpoint(arms[0].ToString(), arms[1] as ModifyData);
@@ -99,17 +106,35 @@ namespace AssetSystem
             }
         }
 
-        void CheckAssetVersion()
+        void CheckRemoteVersion()
         {
             downloader.GetRemoteVersion((remoteVersion) =>
             {
-                if (downloader.CheckAssetVersion(downloader.GetLocalVersion(), remoteVersion))
-                    UpdateProcess(EHotDownloadProgress.Over);
-                else
-                    UpdateProcess(EHotDownloadProgress.DownloadModifyList, remoteVersion);
+                downloader.GetLocalVersion((localVersion) =>
+                {
+                    if (downloader.CheckRemoteVersion(localVersion, remoteVersion))
+                        UpdateProcess(EHotDownloadProgress.Over);
+                    else
+                        UpdateProcess(EHotDownloadProgress.DownloadModifyList, remoteVersion);
+                });
             });
         }
 
+        void CheckPersistentResource()
+        {
+            if (downloader.CheckPersistentResource())
+                UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
+            else
+                UpdateProcess(EHotDownloadProgress.ClearPersistentResource);
+        }
+
+        void ClearPersistentResource()
+        {
+            // 清理所有
+            System.IO.Directory.Delete(AssetBundlePathResolver.instance.GetBundlePersistentFile());
+            System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
+            UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
+        }
 
         void DownloadModifyList(string version)
         {
@@ -151,7 +176,7 @@ namespace AssetSystem
             int index = 0;
             if (System.IO.File.Exists(GetBreakpointPath(version)))
             {
-                int.TryParse(System.IO.File.ReadAllText(GetBreakpointPath(version), System.Text.Encoding.UTF8), out index);
+                int.TryParse(HDResolver.ReadFile(GetBreakpointPath(version)), out index);
             }
             if (index < 0 || index > data.datas.Length)
             {
@@ -172,16 +197,12 @@ namespace AssetSystem
             int nextIndex = index + 1;
             downloader.Download(url, (currtSize) =>
             {
-                ProcessEvent?.Invoke(downLoadCurrtSize + currtSize, downLoadMaxSize, nextIndex, data.datas.Length);
+                ProcessEvent?.Invoke(assetName, downLoadCurrtSize + currtSize, downLoadMaxSize, nextIndex, data.datas.Length);
             },
             (ok, bytes) =>
             {
                 if (ok)
                 {
-                    if (!System.IO.Directory.Exists(AssetBundlePathResolver.instance.GetBundlePersistentFile()))
-                    {
-                        System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
-                    }
                     string localPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(assetName);
                     using (System.IO.FileStream fs = new System.IO.FileStream(localPath, System.IO.FileMode.Create))
                     {
@@ -196,7 +217,7 @@ namespace AssetSystem
                     }
                     else
                     {
-                        System.IO.File.WriteAllText(GetBreakpointPath(version), (nextIndex).ToString(), System.Text.Encoding.UTF8);
+                        HDResolver.WriteFile(GetBreakpointPath(version), (nextIndex).ToString());
                         DownloadAssets(version, data, nextIndex);
                     }
                 }
@@ -214,10 +235,6 @@ namespace AssetSystem
             {
                 if (ok)
                 {
-                    if (!System.IO.Directory.Exists(AssetBundlePathResolver.instance.GetBundlePersistentFile()))
-                    {
-                        System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
-                    }
                     string localPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(AssetBundlePathResolver.instance.GetBundlePlatformRuntime());
                     using (System.IO.FileStream fs = new System.IO.FileStream(localPath, System.IO.FileMode.Create))
                     {
@@ -236,7 +253,7 @@ namespace AssetSystem
         void FinishDownload(string version)
         {
             downloader.SetLocalVersion(version);
-            UpdateProcess(EHotDownloadProgress.CheckAssetVersion);
+            UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
         }
 
 

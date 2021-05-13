@@ -7,11 +7,16 @@ using UnityEngine.Networking;
 
 namespace AssetSystem
 {
-    public class WWWHotDownload : IAssetHotDownload
+    public class BaseHotDownload : IAssetHotDownload
     {
-
-        public virtual bool CheckAssetVersion(string localVersion, string remoteVersion)
+        public virtual bool CheckPersistentResource()
         {
+            return true;
+        }
+
+        public virtual bool CheckRemoteVersion(string localVersion, string remoteVersion)
+        {
+            Debug.Log("CheckAssetVersion    " + "local:" + localVersion + "  remote:" + remoteVersion);
             return localVersion.Equals(remoteVersion);
         }
 
@@ -29,19 +34,44 @@ namespace AssetSystem
             }));
         }
 
-        public virtual string GetLocalVersion()
+        public virtual void GetLocalVersion(Action<string> result)
         {
-            return PlayerPrefs.GetString("localVersion");
+            string url = AssetBundlePathResolver.instance.GetBundleFileRuntime("version.txt");
+            Download(url, null, (ok, bytes) =>
+           {
+               if (ok)
+               {
+                   string localVer = System.Text.Encoding.Default.GetString(bytes);
+                   result?.Invoke(localVer);
+               }
+               else
+               {
+                   throw new Exception("GetLocalVersion Fail");
+               }
+           });
         }
 
         public virtual void GetRemoteVersion(Action<string> result)
         {
-            result?.Invoke("2");
+            string url = string.Format("{0}/{1}/version.txt", AssetDownload.instance.remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime());
+            Download(url, null, (ok, bytes) =>
+            {
+                if (ok)
+                {
+                    string remoteVer = System.Text.Encoding.Default.GetString(bytes);
+                    result?.Invoke(remoteVer);
+                }
+                else
+                {
+                    throw new Exception("GetRemoteVersion Fail");
+                }
+            });
         }
 
         public virtual void SetLocalVersion(string version)
         {
-            PlayerPrefs.SetString("localVersion", version);
+            string localPath = AssetBundlePathResolver.instance.GetBundlePersistentFile("version.txt");
+            HDResolver.WriteFile(localPath, version);
         }
 
         private IEnumerator LoadResourceCorotine(string url, Action<byte[]> downloadOverCall, Action<string> errorCall, Action<ulong> downLoadBytes)
@@ -65,6 +95,7 @@ namespace AssetSystem
             {
                 downloadOverCall?.Invoke(www.downloadHandler.data);
             }
+            www.Dispose();
         }
 
     }
