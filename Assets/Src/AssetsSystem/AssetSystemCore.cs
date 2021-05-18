@@ -58,6 +58,11 @@ namespace AssetSystem
 
         public void Initialize(string root, LoadType _loadType, bool simulateIODelay = false)
         {
+            if (m_Loader != null)
+            {
+                m_Loader.Destory();
+                m_Loader = null;
+            }
             m_loadType = _loadType;
             m_simulateIODelay = simulateIODelay;
             switch (m_loadType)

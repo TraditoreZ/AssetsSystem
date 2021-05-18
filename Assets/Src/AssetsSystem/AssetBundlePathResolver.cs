@@ -73,7 +73,7 @@ namespace AssetSystem
         public virtual string GetBundleSourceFile(string path = "", bool forWWW = false)
         {
             string filePath = null;
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_STANDALONE
             if (forWWW)
                 filePath = string.Format("file://{0}/StreamingAssets/{1}/{2}/{3}", Application.dataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
             else
@@ -94,7 +94,10 @@ namespace AssetSystem
 
         public virtual string GetBundlePersistentFile(string path = "", bool forWWW = false)
         {
-            return string.Format("{0}/{1}/{2}/{3}", Application.persistentDataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
+            if (forWWW)
+                return string.Format("file://{0}/{1}/{2}/{3}", Application.persistentDataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
+            else
+                return string.Format("{0}/{1}/{2}/{3}", Application.persistentDataPath, BundleSaveDirName, GetBundlePlatformRuntime(), path);
         }
 
 
@@ -106,8 +109,7 @@ namespace AssetSystem
         /// <returns></returns>
         public virtual string GetBundleFileRuntime(string path = "", bool forWWW = false)
         {
-            string PerPath = GetBundlePersistentFile(path, forWWW);
-            return File.Exists(PerPath) ? PerPath : GetBundleSourceFile(path, forWWW);
+            return File.Exists(GetBundlePersistentFile(path, false)) ? GetBundlePersistentFile(path, forWWW) : GetBundleSourceFile(path, forWWW);
         }
 
         public virtual string GetBundlePlatformRuntime()

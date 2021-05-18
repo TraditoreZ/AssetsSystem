@@ -36,7 +36,7 @@ namespace AssetSystem
 
         public virtual void GetLocalVersion(Action<string> result)
         {
-            string url = AssetBundlePathResolver.instance.GetBundleFileRuntime("version.txt");
+            string url = AssetBundlePathResolver.instance.GetBundleFileRuntime("version.txt", true);
             Download(url, null, (ok, bytes) =>
            {
                if (ok)

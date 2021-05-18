@@ -131,7 +131,7 @@ namespace AssetSystem
         void ClearPersistentResource()
         {
             // 清理所有
-            System.IO.Directory.Delete(AssetBundlePathResolver.instance.GetBundlePersistentFile());
+            System.IO.Directory.Delete(AssetBundlePathResolver.instance.GetBundlePersistentFile(), true);
             System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
             UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
         }

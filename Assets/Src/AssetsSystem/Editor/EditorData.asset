@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: EditorData
   m_EditorClassIdentifier: 
   configPath: Assets/Src/AssetsSystem/Editor/exampleCfg
-  options: 256
+  options: 0
   lastBuildTarger: 13
   increment: 1
   incrementPath: E:/AssetsSystem/HotDownload
-  version: 8
+  version: 2
   sourceVersion: 0

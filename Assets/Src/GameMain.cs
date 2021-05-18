@@ -3,9 +3,26 @@ using System.Collections.Generic;
 using AssetSystem;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameMain : MonoBehaviour
 {
+
+    public GameObject login;
+
+    public GameObject hotdown;
+
+    public Button startBtn;
+
+    public Button hotdownBtn;
+
+    public Slider progress;
+
+    public Text progressText;
+
+    public Button clearResBtn;
+
+    public Button quitBtn;
 
     // Use this for initialization
     void Start()
@@ -13,39 +30,94 @@ public class GameMain : MonoBehaviour
         Asset.Initialize("Assets", LoadType.AssetBundle);
         //AssetSystemCore.Instance.Initialize("", LoadType.Resource);
         //AssetSystemCore.Instance.Initialize("Assets", LoadType.AssetDatabase);
-        
+
         AssetDownload.instance.DownloadEvent += DownloadCallBack;
         AssetDownload.instance.ProcessEvent += ProcessCallBack;
+        AssetDownload.instance.HotDownloadOverEvent += DownloadOverCallback;
+        AssetDownload.instance.ErrorEvent += HotDownErrorCall;
+        hotdownBtn.onClick.AddListener(HotDown);
+        startBtn.onClick.AddListener(StartCall);
+        clearResBtn.onClick.AddListener(clearCallback);
+        quitBtn.onClick.AddListener(quitCallback);
+    }
+
+    private void quitCallback()
+    {
+        Application.Quit();
+    }
+
+    private void HotDownErrorCall(string error)
+    {
+        Debug.LogError(error);
+    }
+
+    private void clearCallback()
+    {
+        System.IO.Directory.Delete(AssetBundlePathResolver.instance.GetBundlePersistentFile(), true);
+        System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
+    }
+
+    private void StartCall()
+    {
+        login.SetActive(false);
+    }
+
+    private void DownloadOverCallback()
+    {
+        progress.value = 1;
+        SceneManager.LoadScene("main");
+    }
+
+    private void HotDown()
+    {
+        AssetDownload.ResourceUpdateOnRemote("http://192.168.11.20:8080/assetbundle", new BaseHotDownload());
+        hotdown.SetActive(true);
+        startBtn.gameObject.SetActive(false);
+        hotdownBtn.gameObject.SetActive(false);
+        clearResBtn.gameObject.SetActive(false);
+        progress.value = 0;
+    }
+
+    void OnEnable()
+    {
+        login.SetActive(true);
+        hotdown.SetActive(false);
+        startBtn.gameObject.SetActive(true);
+        hotdownBtn.gameObject.SetActive(true);
+        clearResBtn.gameObject.SetActive(true);
     }
 
     private void DownloadCallBack(EHotDownloadProgress progress)
     {
         Debug.Log("[AssetDownload] => " + progress);
+        progressText.text = progress.ToString();
     }
 
     private void ProcessCallBack(string assetName, long currtSize, long maxSize, int index, int count)
     {
         Debug.Log(string.Format("{5} [{0}/{1}]      {2}kb/{3}kb     {4:f2}%", index, count, currtSize / 1024, maxSize / 1024, ((float)currtSize / maxSize) * 100, assetName));
+        progress.value = (float)currtSize / maxSize;
+        progressText.text = string.Format("{0} kb / {1} kb  {2:f2}%", currtSize / 1024, maxSize / 1024, ((float)currtSize / maxSize) * 100);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
 
-    }
 
     List<GameObject> objs = new List<GameObject>();
 
     void OnGUI()
     {
-        if (GUILayout.Button("Load"))
+        if (login.activeSelf)
+        {
+            return;
+        }
+        if (GUILayout.Button("Load", GUILayout.Width(200), GUILayout.Height(70)))
         {
             var go = Asset.Load<GameObject>("Res/Actor/2001_player_wumingdj/2001_player_wumingdj");
             var instance = Instantiate(go, new Vector3(Random.Range(-3f, 3f), 0, 0), Quaternion.identity);
             objs.Add(instance);
         }
 
-        if (GUILayout.Button("LoadAsync"))
+        if (GUILayout.Button("LoadAsync", GUILayout.Width(200), GUILayout.Height(70)))
         {
             Asset.LoadAsync("Res/Actor/2001_player_wumingdj/2001_player_wumingdj", (go) =>
              {
@@ -53,7 +125,7 @@ public class GameMain : MonoBehaviour
              });
         }
 
-        if (GUILayout.Button("Unload"))
+        if (GUILayout.Button("Unload", GUILayout.Width(200), GUILayout.Height(70)))
         {
             foreach (var item in objs)
             {
@@ -63,7 +135,7 @@ public class GameMain : MonoBehaviour
             Asset.Unload("Res/Actor/2001_player_wumingdj/2001_player_wumingdj");
         }
 
-        if (GUILayout.Button("UnloadAll"))
+        if (GUILayout.Button("UnloadAll", GUILayout.Width(200), GUILayout.Height(70)))
         {
             foreach (var item in objs)
             {
@@ -73,16 +145,22 @@ public class GameMain : MonoBehaviour
             Asset.UnloadAll("Res/2001_player_wumingdj_prefab");
         }
 
-        if (GUILayout.Button("判断资源是否存在"))
+        if (GUILayout.Button("返回大厅", GUILayout.Width(200), GUILayout.Height(70)))
         {
-            Debug.Log(Asset.ExistAsset("Res/Actor/2001_player_wumingdj/2001_player_wumingdj"));
+            foreach (var item in objs)
+            {
+                Destroy(item);
+            }
+            objs.Clear();
+            Asset.UnloadAll("Res/2001_player_wumingdj_prefab");
+            SceneManager.LoadScene("main");
         }
 
-
-        if (GUILayout.Button("热更新"))
-        {
-            AssetDownload.ResourceUpdateOnRemote(@"E:\AssetsSystem\HotDownload", new BaseHotDownload());
-        }
+        // if (GUILayout.Button("热更新"))
+        // {
+        //     //AssetDownload.ResourceUpdateOnRemote(@"E:\AssetsSystem\HotDownload", new BaseHotDownload());
+        //     AssetDownload.ResourceUpdateOnRemote("http://192.168.11.20:8080/assetbundle", new BaseHotDownload());
+        // }
         // if (GUILayout.Button("同步加载场景"))
         // {
         //     string name = Asset.LoadScene("Scenes/test");
