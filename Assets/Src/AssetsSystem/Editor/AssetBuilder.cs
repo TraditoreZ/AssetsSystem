@@ -150,7 +150,8 @@ namespace AssetEditor
                 ModifyData.ModifyCell cell = new ModifyData.ModifyCell();
                 modifyJson.datas[index++] = cell;
                 cell.name = item.Key;
-                cell.hash = item.Value;
+                cell.bundleHash = item.Value;
+                cell.fileHash = HDResolver.GetFileHash(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name));
                 cell.size = (new System.IO.FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name))).Length;
             }
             using (StreamWriter sw = new StreamWriter(outPath, false))

@@ -8,7 +8,8 @@ namespace AssetSystem
         public class ModifyCell
         {
             public string name;
-            public string hash;
+            public string bundleHash;
+            public string fileHash;
             public long size;
         }
 

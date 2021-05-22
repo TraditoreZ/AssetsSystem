@@ -64,7 +64,7 @@ namespace AssetSystem
                 downloadFlag = true;
                 foreach (var localAsset in localAssetbundles)
                 {
-                    if (modifyCell.name.Equals(localAsset) && modifyCell.hash.Equals(localManifest.GetAssetBundleHash(localAsset)))
+                    if (modifyCell.name.Equals(localAsset) && modifyCell.bundleHash.Equals(localManifest.GetAssetBundleHash(localAsset).ToString()))
                     {
                         downloadFlag = false;
                     }
@@ -93,13 +93,10 @@ namespace AssetSystem
                 FileInfo fileInfo = new FileInfo(assetPath);
                 if (fileInfo.Exists)
                 {
-                    if (fileInfo.Length != modifyCell.size)
+                    if (!GetFileHash(assetPath).Equals(modifyCell.fileHash))
                     {
                         cells.Add(modifyCell);
-                    }
-                    else if (!allManifest.GetAssetBundleHash(modifyCell.name).ToString().Equals(modifyCell.hash))
-                    {  // md5不一致
-                        cells.Add(modifyCell);
+                        Debug.Log("资源MD5发生改变, 需要热更新:" + modifyCell.name);
                     }
                 }
                 else
@@ -139,6 +136,34 @@ namespace AssetSystem
             using (StreamReader sr = new StreamReader(path))
             {
                 return sr.ReadToEnd();
+            }
+        }
+
+
+        public static string GetFileHash(string filePath)
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Open))
+                {
+                    int len = (int)fs.Length;
+                    byte[] data = new byte[len];
+                    fs.Read(data, 0, len);
+                    fs.Close();
+                    MD5 md5 = new MD5CryptoServiceProvider();
+                    byte[] result = md5.ComputeHash(data);
+                    string fileMD5 = "";
+                    foreach (byte b in result)
+                    {
+                        fileMD5 += Convert.ToString(b, 16);
+                    }
+                    return fileMD5;
+                }
+            }
+            catch (FileNotFoundException e)
+            {
+                Debug.LogError(e);
+                return "";
             }
         }
 

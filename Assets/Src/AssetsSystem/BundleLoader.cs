@@ -300,20 +300,28 @@ namespace AssetSystem
 
         private void InitConfig()
         {
-            AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
-            AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-            allDependencies = new Dictionary<string, string[]>();
-            var bundles = allManifest.GetAllAssetBundles();
-            foreach (var bundle in bundles)
+            try
             {
-                allDependencies.Add(bundle, allManifest.GetAllDependencies(bundle));
+                AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
+                AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                allDependencies = new Dictionary<string, string[]>();
+                var bundles = allManifest.GetAllAssetBundles();
+                foreach (var bundle in bundles)
+                {
+                    allDependencies.Add(bundle, allManifest.GetAllDependencies(bundle));
+                }
+                assetBundle.Unload(true);
+                AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
+                string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                ruleAB.Unload(true);
+                rules = new List<AssetBundleRule>();
+                AssetBundleBuildConfig.ResolveRule(rules, commands);
             }
-            assetBundle.Unload(true);
-            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
-            string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            ruleAB.Unload(true);
-            rules = new List<AssetBundleRule>();
-            AssetBundleBuildConfig.ResolveRule(rules, commands);
+            catch (System.Exception e)
+            {
+                Debug.LogError(e);
+            }
+
         }
 
     }

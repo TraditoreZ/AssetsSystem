@@ -6,6 +6,7 @@ using Object = UnityEngine.Object;
 
 namespace AssetSystem
 {
+    [DefaultExecutionOrder(int.MaxValue)]
     public class AssetSystemCore : MonoBehaviour
     {
 

@@ -9,6 +9,9 @@ namespace AssetSystem
 {
     public class BaseHotDownload : IAssetHotDownload
     {
+        private const int mathSpeedCount = 30;
+        private Queue<float> downLoadSpeeds = new Queue<float>();
+
         public virtual bool CheckPersistentResource()
         {
             return true;
@@ -32,6 +35,16 @@ namespace AssetSystem
             {
                 process?.Invoke((long)byteSize);
             }));
+        }
+
+        public float DownloadSpeed()
+        {
+            float allSpeed = 0;
+            foreach (var speed in downLoadSpeeds)
+            {
+                allSpeed += speed;
+            }
+            return allSpeed / downLoadSpeeds.Count;
         }
 
         public virtual void GetLocalVersion(Action<string> result)
@@ -78,11 +91,16 @@ namespace AssetSystem
         {
             UnityWebRequest www = new UnityWebRequest(url);
             DownloadHandlerBuffer dH = new DownloadHandlerBuffer();
+            www.disposeDownloadHandlerOnDispose = true;
             www.downloadHandler = dH;
             www.SendWebRequest();
+            ulong lastDownloadbytes = 0;
             while (!www.isDone)
             {
                 yield return null;
+                long downloadBytes = (long)(www.downloadedBytes - lastDownloadbytes);
+                lastDownloadbytes = www.downloadedBytes;
+                GetDownloadSpeed(downloadBytes);
                 downLoadBytes?.Invoke(www.downloadedBytes);
             }
             if (www.isHttpError || www.isNetworkError)
@@ -96,6 +114,15 @@ namespace AssetSystem
                 downloadOverCall?.Invoke(www.downloadHandler.data);
             }
             www.Dispose();
+        }
+
+        private void GetDownloadSpeed(long downLoadbytes)
+        {
+            downLoadSpeeds.Enqueue(downLoadbytes / Time.deltaTime);
+            if (downLoadSpeeds.Count > mathSpeedCount)
+            {
+                downLoadSpeeds.Dequeue();
+            }
         }
 
     }

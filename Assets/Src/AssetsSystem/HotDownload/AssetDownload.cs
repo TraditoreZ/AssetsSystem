@@ -24,7 +24,7 @@ namespace AssetSystem
 
         private string m_remoteUrl;
 
-        private IAssetHotDownload downloader;
+        public IAssetHotDownload downloader { get; private set; }
 
         public string remoteUrl { get { return m_remoteUrl; } }
 
