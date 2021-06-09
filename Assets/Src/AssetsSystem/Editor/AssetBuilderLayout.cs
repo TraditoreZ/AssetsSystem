@@ -44,8 +44,10 @@ namespace AssetEditor
         public void OnGUI()
         {
             GUILayout.Label("【规则文件路径】");
-            editorData.configPath = EditorGUILayout.TextField("", editorData.configPath, GUILayout.Width(editorData.configPath.Length > 0 ? editorData.configPath.Length * 7 : 100));
-
+            GUILayout.Label("【母包规则配置】");
+            editorData.baseConfigPath = EditorGUILayout.TextField("", editorData.baseConfigPath, GUILayout.Width(editorData.baseConfigPath.Length > 0 ? editorData.baseConfigPath.Length * 7 : 100));
+            GUILayout.Label("【分包规则配置】");
+            editorData.splitConfigPath = EditorGUILayout.TextField("", editorData.splitConfigPath, GUILayout.Width(editorData.splitConfigPath.Length > 0 ? editorData.splitConfigPath.Length * 7 : 100));
 
             GUILayout.Label("【分包根目录】");
             GUILayout.Label(editorData.incrementPath);
@@ -78,7 +80,7 @@ namespace AssetEditor
 
             if (GUILayout.Button("开始打包", GUILayout.Width(142), GUILayout.Height(30)))
             {
-                AssetBuilder.BuildAssetBundle(editorData.configPath, editorData.options, editorData.lastBuildTarger, editorData.increment);
+                AssetBuilder.BuildAssetBundle(editorData.increment ? editorData.splitConfigPath : editorData.baseConfigPath, editorData.options, editorData.lastBuildTarger, editorData.increment);
                 AssetBuilder.BuildManifest(editorData.version, editorData.lastBuildTarger);
                 if (editorData.increment)
                 {

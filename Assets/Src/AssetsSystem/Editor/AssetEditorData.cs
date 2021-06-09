@@ -7,7 +7,8 @@ using UnityEngine;
 // [CreateAssetMenu(menuName = "MySubMenue/Create MyScriptableObject ")]
 public class AssetEditorData : ScriptableObject
 {
-    public string configPath = "Assets/Src/AssetsSystem/Editor/exampleCfg";
+    public string baseConfigPath = "Assets/Src/AssetsSystem/Editor/exampleCfg";
+    public string splitConfigPath = "Assets/Src/AssetsSystem/Editor/exampleCfg";
 
     [EnumMultiAttribute]
     public BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression;

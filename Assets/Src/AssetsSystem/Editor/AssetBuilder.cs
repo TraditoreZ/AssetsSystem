@@ -39,7 +39,7 @@ namespace AssetEditor
             {
                 throw new System.Exception("Not find EditorData.asset");
             }
-            BuildAssetBundle(data.configPath, data.options, buildTarget, increment);
+            BuildAssetBundle(data.splitConfigPath, data.options, buildTarget, increment);
         }
 
         public static void GenerateModifyList(BuildTarget buildTarget, string currtVersion, string sourceVersion)
@@ -153,6 +153,7 @@ namespace AssetEditor
                 cell.bundleHash = item.Value;
                 cell.fileHash = HDResolver.GetFileHash(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name));
                 cell.size = (new System.IO.FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name))).Length;
+                cell.writeTime = new FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name)).LastWriteTimeUtc.ToString();
             }
             using (StreamWriter sw = new StreamWriter(outPath, false))
             {
@@ -180,7 +181,7 @@ namespace AssetEditor
                         pack.options = info.Value.options;
                         packs.Add(info.Value.packName, pack);
                     }
-                    if (pack.assets.Add(assetPath))
+                    if (pack.assets.Add(assetPath) && File.Exists(assetPath))
                     {
                         pack.size_MB += (new System.IO.FileInfo(assetPath).Length / 1048576f); // byte => mb
                     }

@@ -40,6 +40,7 @@ namespace AssetSystem
         private long downLoadCurrtSize;
         private long downLoadMaxSize;
 
+        private bool checkFileMD5;
 
         void Awake()
         {
@@ -47,10 +48,11 @@ namespace AssetSystem
         }
 
 
-        public static void ResourceUpdateOnRemote(string remoteUrl, IAssetHotDownload assetHotDownload)
+        public static void ResourceUpdateOnRemote(string remoteUrl, IAssetHotDownload assetHotDownload, bool checkMD5 = false)
         {
             instance.downloader = assetHotDownload;
             instance.m_remoteUrl = remoteUrl;
+            instance.checkFileMD5 = checkMD5;
             if (!System.IO.Directory.Exists(AssetBundlePathResolver.instance.GetBundlePersistentFile()))
                 System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
             instance.UpdateProcess(EHotDownloadProgress.CheckPersistentResource);
@@ -165,7 +167,7 @@ namespace AssetSystem
 
         void CompareAssetHash(string version, ModifyData data)
         {
-            if (HDResolver.IsPersistAssetNeedUpdate(ref data))
+            if (HDResolver.IsPersistAssetNeedUpdate(ref data, checkFileMD5))
                 UpdateProcess(EHotDownloadProgress.CheckBreakpoint, version, data);
             else
                 UpdateProcess(EHotDownloadProgress.FinishDownload, version);

@@ -80,7 +80,7 @@ namespace AssetSystem
         }
 
         // 返回 是否需要更新资源
-        public static bool IsPersistAssetNeedUpdate(ref ModifyData modifyData)
+        public static bool IsPersistAssetNeedUpdate(ref ModifyData modifyData, bool checkMD5)
         {
             if (modifyData == null || modifyData.datas == null || modifyData.datas.Length == 0)
                 return false;
@@ -93,7 +93,17 @@ namespace AssetSystem
                 FileInfo fileInfo = new FileInfo(assetPath);
                 if (fileInfo.Exists)
                 {
-                    if (!GetFileHash(assetPath).Equals(modifyCell.fileHash))
+                    if (!fileInfo.Length.Equals(modifyCell.size))
+                    {
+                        cells.Add(modifyCell);
+                        Debug.Log("资源大小发生改变, 需要热更新:" + modifyCell.name);
+                    }
+                    else if (!fileInfo.LastWriteTimeUtc.ToString().Equals(modifyCell.writeTime))
+                    {
+                        cells.Add(modifyCell);
+                        Debug.Log("资源被修改, 需要热更新:" + modifyCell.name);
+                    }
+                    else if (checkMD5 && !GetFileHash(assetPath).Equals(modifyCell.fileHash))
                     {
                         cells.Add(modifyCell);
                         Debug.Log("资源MD5发生改变, 需要热更新:" + modifyCell.name);
@@ -102,6 +112,7 @@ namespace AssetSystem
                 else
                 {
                     cells.Add(modifyCell);
+                    Debug.Log("资源不存在, 需要热更新:" + modifyCell.name);
                 }
             }
             allManifest = null;
@@ -159,6 +170,17 @@ namespace AssetSystem
                     }
                     return fileMD5;
                 }
+                // using (HashAlgorithm hash = HashAlgorithm.Create())
+                // {
+                //     using (FileStream file = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                //     {
+                //         //哈希算法根据文本得到哈希码的字节数组 
+                //         byte[] hashByte = hash.ComputeHash(file);
+                //         hash.Dispose();
+                //         //将字节数组装换为字符串 
+                //         return BitConverter.ToString(hashByte);
+                //     }
+                // }
             }
             catch (FileNotFoundException e)
             {
