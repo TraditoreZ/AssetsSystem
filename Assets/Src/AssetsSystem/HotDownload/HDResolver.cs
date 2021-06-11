@@ -93,20 +93,20 @@ namespace AssetSystem
                 FileInfo fileInfo = new FileInfo(assetPath);
                 if (fileInfo.Exists)
                 {
+                    if (!modifyCell.bundleHash.Equals(allManifest.GetAssetBundleHash(modifyCell.name).ToString()))
+                    {
+                        cells.Add(modifyCell);
+                        Debug.Log("资源bundle md5变化, 需要热更新:" + modifyCell.name);
+                    }
                     if (!fileInfo.Length.Equals(modifyCell.size))
                     {
                         cells.Add(modifyCell);
                         Debug.Log("资源大小发生改变, 需要热更新:" + modifyCell.name);
                     }
-                    else if (!fileInfo.LastWriteTimeUtc.ToString().Equals(modifyCell.writeTime))
-                    {
-                        cells.Add(modifyCell);
-                        Debug.Log("资源被修改, 需要热更新:" + modifyCell.name);
-                    }
                     else if (checkMD5 && !GetFileHash(assetPath).Equals(modifyCell.fileHash))
                     {
                         cells.Add(modifyCell);
-                        Debug.Log("资源MD5发生改变, 需要热更新:" + modifyCell.name);
+                        Debug.Log("资源文件MD5发生改变, 需要热更新:" + modifyCell.name);
                     }
                 }
                 else

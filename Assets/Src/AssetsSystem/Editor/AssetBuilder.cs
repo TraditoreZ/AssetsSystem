@@ -153,7 +153,6 @@ namespace AssetEditor
                 cell.bundleHash = item.Value;
                 cell.fileHash = HDResolver.GetFileHash(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name));
                 cell.size = (new System.IO.FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name))).Length;
-                cell.writeTime = new FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name)).LastWriteTimeUtc.ToString();
             }
             using (StreamWriter sw = new StreamWriter(outPath, false))
             {

@@ -11,7 +11,6 @@ namespace AssetSystem
             public string bundleHash;
             public string fileHash;
             public long size;
-            public string writeTime;
         }
 
         public ModifyCell[] datas;
