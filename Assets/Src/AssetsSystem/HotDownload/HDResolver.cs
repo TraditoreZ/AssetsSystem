@@ -98,7 +98,7 @@ namespace AssetSystem
                         cells.Add(modifyCell);
                         Debug.Log("资源bundle md5变化, 需要热更新:" + modifyCell.name);
                     }
-                    if (!fileInfo.Length.Equals(modifyCell.size))
+                    else if (!fileInfo.Length.Equals(modifyCell.size))
                     {
                         cells.Add(modifyCell);
                         Debug.Log("资源大小发生改变, 需要热更新:" + modifyCell.name);
