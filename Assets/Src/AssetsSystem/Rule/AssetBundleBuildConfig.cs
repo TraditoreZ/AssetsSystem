@@ -55,6 +55,7 @@ namespace AssetSystem
             {
                 var match = Regex.Match(path, ruleExpression);
                 string packName = rule.packName;
+                string binaryType = string.Empty;
                 if (match.Groups.Count > 1)
                 {
                     string[] format = new string[match.Groups.Count - 1];

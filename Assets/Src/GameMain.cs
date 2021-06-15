@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using AssetSystem;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class GameMain : MonoBehaviour
 {
@@ -23,6 +26,10 @@ public class GameMain : MonoBehaviour
     public Button clearResBtn;
 
     public Button quitBtn;
+
+    public RectTransform canvas;
+
+    public VideoPlayer videoPlayer;
 
     // Use this for initialization
     void Start()
@@ -53,7 +60,7 @@ public class GameMain : MonoBehaviour
 
     private void clearCallback()
     {
-        System.IO.Directory.Delete(AssetBundlePathResolver.instance.GetBundlePersistentFile(), true);
+        System.IO.Directory.Delete(Application.persistentDataPath, true);
         System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
     }
 
@@ -85,6 +92,7 @@ public class GameMain : MonoBehaviour
         startBtn.gameObject.SetActive(true);
         hotdownBtn.gameObject.SetActive(true);
         clearResBtn.gameObject.SetActive(true);
+        videoPlayer.gameObject.SetActive(false);
     }
 
     private void DownloadCallBack(EHotDownloadProgress progress)
@@ -155,7 +163,16 @@ public class GameMain : MonoBehaviour
             Asset.UnloadAll("Res/2001_player_wumingdj_prefab");
             SceneManager.LoadScene("main");
         }
-
+        if (GUILayout.Button("加载视频", GUILayout.Width(200), GUILayout.Height(70)))
+        {
+            videoPlayer.gameObject.SetActive(true);
+            if (File.Exists(AssetBundlePathResolver.instance.GetBundlePersistentFile("customvideo/movie.mp4")))
+            {
+                Debug.Log("存在资源");
+                videoPlayer.url = AssetBundlePathResolver.instance.GetBundlePersistentFile("customvideo/movie.mp4", true);
+            }
+            videoPlayer.Play();
+        }
         // if (GUILayout.Button("热更新"))
         // {
         //     //AssetDownload.ResourceUpdateOnRemote(@"E:\AssetsSystem\HotDownload", new BaseHotDownload());
@@ -179,7 +196,16 @@ public class GameMain : MonoBehaviour
 
     }
 
+    private byte[] ConvetToObj(object obj)
+    {
+        BinaryFormatter se = new BinaryFormatter();
+        MemoryStream memStream = new MemoryStream();
+        se.Serialize(memStream, obj);
+        byte[] bobj = memStream.ToArray();
+        memStream.Close();
+        return bobj;
 
+    }
 
 
 

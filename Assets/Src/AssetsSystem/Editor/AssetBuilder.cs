@@ -65,6 +65,7 @@ namespace AssetEditor
         public static void BuildAssetBundle(string configPath, BuildAssetBundleOptions options, BuildTarget buildTarget = BuildTarget.StandaloneWindows64, bool increment = false)
         {
             System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+            Dictionary<string, ABPackage> packsDic = null;
             try
             {
                 if (!increment)
@@ -90,9 +91,14 @@ namespace AssetEditor
                 }
                 watch.Reset();
                 watch.Start();
-                Dictionary<string, ABPackage> packsDic = BuildAssetBundlePack(configPath, assetPaths.ToArray());
+                packsDic = BuildAssetBundlePack(configPath, assetPaths.ToArray());
                 watch.Stop();
                 Debug.Log("BuildAssetBundlePack Time:" + RevertToTime(watch.ElapsedMilliseconds));
+                watch.Reset();
+                watch.Start();
+                GenerateBinaryAsset(packsDic.Values.ToArray());
+                watch.Stop();
+                Debug.Log("GenerateBinaryAsset Time:" + RevertToTime(watch.ElapsedMilliseconds));
                 List<AssetBundleBuild> abbLists = new List<AssetBundleBuild>();
                 int index = 0;
                 int max = packsDic.Values.Count;
@@ -103,6 +109,14 @@ namespace AssetEditor
                     AssetBundleBuild abb = new AssetBundleBuild();
                     abb.assetBundleName = pack.packageName;
                     abb.assetNames = pack.assets.ToArray();
+                    if (pack.binary)
+                    {
+                        for (int i = 0; i < abb.assetNames.Length; i++)
+                        {
+                            string path = abb.assetNames[i];
+                            abb.assetNames[i] = path.Replace(path.Substring(path.LastIndexOf("."), path.Length - path.LastIndexOf(".")), ".bytes");
+                        }
+                    }
                     abbLists.Add(abb);
                 }
                 AssetBundleBuild configABB = new AssetBundleBuild();
@@ -119,6 +133,10 @@ namespace AssetEditor
             }
             finally
             {
+                if (packsDic != null)
+                {
+                    DeleteBinaryAsset(packsDic.Values.ToArray());
+                }
                 EditorUtility.ClearProgressBar();
                 AssetDatabase.Refresh();
                 watch.Reset();
@@ -178,6 +196,7 @@ namespace AssetEditor
                         pack = new ABPackage();
                         pack.packageName = info.Value.packName;
                         pack.options = info.Value.options;
+                        pack.binary = info.Value.options.Where(item => item.Contains("binary")).Count() > 0;
                         packs.Add(info.Value.packName, pack);
                     }
                     if (pack.assets.Add(assetPath) && File.Exists(assetPath))
@@ -279,7 +298,36 @@ namespace AssetEditor
             return (hour.ToString() + ":" + minute.ToString() + ":" + second.ToString());
         }
 
+        static void GenerateBinaryAsset(ABPackage[] packages)
+        {
+            foreach (var package in packages)
+            {
+                if (package.binary)
+                {
+                    Debug.LogWarning(package.packageName);
+                    foreach (var asset in package.assets)
+                    {
+                        Debug.Log(asset);
+                        string binaryPath = asset.Replace(asset.Substring(asset.LastIndexOf("."), asset.Length - asset.LastIndexOf(".")), ".bytes");
+                        AssetDatabase.CopyAsset(asset, binaryPath);
+                    }
+                }
+            }
+        }
 
+        static void DeleteBinaryAsset(ABPackage[] packages)
+        {
+            foreach (var package in packages)
+            {
+                if (package.binary)
+                {
+                    foreach (var asset in package.assets)
+                    {
+                        AssetDatabase.DeleteAsset(asset.Replace(asset.Substring(asset.LastIndexOf("."), asset.Length - asset.LastIndexOf(".")), ".bytes"));
+                    }
+                }
+            }
+        }
 
     }
 }

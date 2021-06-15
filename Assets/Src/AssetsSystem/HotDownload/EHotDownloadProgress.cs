@@ -13,6 +13,7 @@
         CheckBreakpoint = 8,
         DownloadManifest = 9,
         ClearPersistentResource = 10,
-        Over = 11,
+        UnzipBinary = 11,
+        Over = 12,
     }
 }

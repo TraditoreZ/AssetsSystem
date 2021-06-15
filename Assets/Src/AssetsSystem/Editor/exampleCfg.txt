@@ -27,3 +27,7 @@ Assets/GameAssets/Animation/(.+?)/.+ => animation : split_hash 5
 
 // 场景
 Assets/Scenes/(\w*) => {0}_level
+
+Assets/GameRes/lua/.+ => main_lua
+
+CustomVideo/.+ => video : binary mp4

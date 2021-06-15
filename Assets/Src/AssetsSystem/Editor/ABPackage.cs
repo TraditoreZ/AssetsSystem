@@ -10,5 +10,7 @@ namespace AssetEditor
         public double size_MB;
 
         public string[] options;
+
+        public bool binary;
     }
 }

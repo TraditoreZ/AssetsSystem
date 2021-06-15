@@ -1,5 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace AssetSystem
@@ -90,13 +93,17 @@ namespace AssetSystem
                         DownloadAssets(arms[0].ToString(), arms[1] as ModifyData, (int)arms[2]);
                         break;
                     case EHotDownloadProgress.DownloadManifest:
-                        DownloadManifest(arms[0].ToString());
+                        DownloadManifest(arms[0].ToString(), arms[1] as ModifyData);
                         break;
                     case EHotDownloadProgress.FinishDownload:
                         FinishDownload(arms[0].ToString());
                         break;
+                    case EHotDownloadProgress.UnzipBinary:
+                        UnzipBinary(arms[0].ToString(), arms[1] as ModifyData);
+                        break;
                     case EHotDownloadProgress.Over:
                         Debug.Log("ResourceUpdateFinish");
+                        System.GC.Collect();
                         HotDownloadOverEvent?.Invoke();
                         break;
                 }
@@ -215,7 +222,7 @@ namespace AssetSystem
                     if (nextIndex >= data.datas.Length)
                     {
                         System.IO.File.Delete(GetBreakpointPath(version));
-                        UpdateProcess(EHotDownloadProgress.DownloadManifest, version);
+                        UpdateProcess(EHotDownloadProgress.DownloadManifest, version, data);
                     }
                     else
                     {
@@ -230,7 +237,7 @@ namespace AssetSystem
             });
         }
 
-        void DownloadManifest(string version)
+        void DownloadManifest(string version, ModifyData data)
         {
             string url = string.Format("{0}/{1}/{2}", remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime(), AssetBundlePathResolver.instance.GetBundlePlatformRuntime());
             downloader.Download(url, null, (ok, bytes) =>
@@ -243,7 +250,7 @@ namespace AssetSystem
                         fs.Write(bytes, 0, bytes.Length);
                         fs.Close();
                     }
-                    UpdateProcess(EHotDownloadProgress.FinishDownload, version);
+                    UpdateProcess(EHotDownloadProgress.UnzipBinary, version, data);
                 }
                 else
                 {
@@ -258,6 +265,49 @@ namespace AssetSystem
             UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
         }
 
+        void UnzipBinary(string version, ModifyData data)
+        {
+            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
+            string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            ruleAB.Unload(true);
+            var rules = new List<AssetBundleRule>();
+            AssetBundleBuildConfig.ResolveRule(rules, commands);
+            Dictionary<string, string> unzipList = new Dictionary<string, string>();
+            //TODO 重新解析bundle  解析rule  看看哪些包是二进制的， 然后解压到本地
+            foreach (var modifyCell in data.datas)
+            {
+                foreach (var rule in rules)
+                {
+                    if (modifyCell.name.Equals(rule.packName) && rule.options.Where(item => item.Contains("binary")).Count() > 0)
+                    {
+                        string binaryType = rule.options.Where(item => item.Contains("binary")).FirstOrDefault().Replace("binary", "");
+                        unzipList.Add(rule.packName, binaryType);
+                        Debug.Log("待解压资源:" + rule.packName + "   类型:" + binaryType);
+                    }
+                }
+            }
+            foreach (var unzipCell in unzipList)
+            {
+                AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundlePersistentFile(unzipCell.Key));
+                string[] names = ab.GetAllAssetNames();
+                foreach (var name in names)
+                {
+                    string targerPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(name.Replace("bytes", unzipCell.Value).Replace("assets/", ""));
+                    Debug.Log("解压到目标:" + targerPath);
+                    if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(targerPath)))
+                    {
+                        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(targerPath));
+                    }
+                    TextAsset ta = ab.LoadAsset<TextAsset>(name);
+                    using (FileStream fs = new FileStream(targerPath, FileMode.CreateNew))
+                    {
+                        fs.Write(ta.bytes, 0, ta.bytes.Length);
+                        fs.Close();
+                    }
+                }
+            }
+            UpdateProcess(EHotDownloadProgress.FinishDownload, version);
+        }
 
         string GetBreakpointPath(string version)
         {

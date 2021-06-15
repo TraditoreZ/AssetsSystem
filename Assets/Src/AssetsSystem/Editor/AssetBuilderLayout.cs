@@ -45,15 +45,22 @@ namespace AssetEditor
         {
             GUILayout.Label("【规则文件路径】");
             GUILayout.Label("【母包规则配置】");
-            editorData.baseConfigPath = EditorGUILayout.TextField("", editorData.baseConfigPath, GUILayout.Width(editorData.baseConfigPath.Length > 0 ? editorData.baseConfigPath.Length * 7 : 100));
+            GUILayout.Label(editorData.baseConfigPath);
+            if (GUILayout.Button("选择路径", GUILayout.Width(100), GUILayout.Height(20)))
+            {
+                editorData.baseConfigPath = EditorUtility.OpenFolderPanel("【母包规则配置】", "", "");
+            }
             GUILayout.Label("【分包规则配置】");
-            editorData.splitConfigPath = EditorGUILayout.TextField("", editorData.splitConfigPath, GUILayout.Width(editorData.splitConfigPath.Length > 0 ? editorData.splitConfigPath.Length * 7 : 100));
-
+            GUILayout.Label(editorData.splitConfigPath);
+            if (GUILayout.Button("选择路径", GUILayout.Width(100), GUILayout.Height(20)))
+            {
+                editorData.splitConfigPath = EditorUtility.OpenFolderPanel("【分包规则配置】", "", "");
+            }
             GUILayout.Label("【分包根目录】");
             GUILayout.Label(editorData.incrementPath);
             if (GUILayout.Button("选择路径", GUILayout.Width(100), GUILayout.Height(20)))
             {
-                editorData.incrementPath = EditorUtility.OpenFolderPanel("选择分包根目录", "", "");
+                editorData.incrementPath = EditorUtility.OpenFolderPanel("【分包根目录】", "", "");
             }
             GUILayout.Label("【构建参数】");
             // MethodInfo miIntToEnumFlags = typeof(EditorGUI).GetMethod("IntToEnumFlags", BindingFlags.Static | BindingFlags.NonPublic);
