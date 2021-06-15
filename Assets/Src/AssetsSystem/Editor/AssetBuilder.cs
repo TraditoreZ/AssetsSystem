@@ -114,7 +114,7 @@ namespace AssetEditor
                         for (int i = 0; i < abb.assetNames.Length; i++)
                         {
                             string path = abb.assetNames[i];
-                            abb.assetNames[i] = path.Replace(path.Substring(path.LastIndexOf("."), path.Length - path.LastIndexOf(".")), ".bytes");
+                            abb.assetNames[i] = path + ".bytes";
                         }
                     }
                     abbLists.Add(abb);
@@ -304,15 +304,17 @@ namespace AssetEditor
             {
                 if (package.binary)
                 {
-                    Debug.LogWarning(package.packageName);
+                    int index = 0;
+                    int max = package.assets.Count;
                     foreach (var asset in package.assets)
                     {
-                        Debug.Log(asset);
-                        string binaryPath = asset.Replace(asset.Substring(asset.LastIndexOf("."), asset.Length - asset.LastIndexOf(".")), ".bytes");
-                        AssetDatabase.CopyAsset(asset, binaryPath);
+                        EditorUtility.DisplayCancelableProgressBar("[GenerateBinaryAsset]    " + package.packageName, asset, (float)index++ / max);
+                        string binaryPath = asset + ".bytes";
+                        System.IO.File.Copy(asset, binaryPath, true);
                     }
                 }
             }
+            AssetDatabase.Refresh();
         }
 
         static void DeleteBinaryAsset(ABPackage[] packages)
@@ -323,10 +325,11 @@ namespace AssetEditor
                 {
                     foreach (var asset in package.assets)
                     {
-                        AssetDatabase.DeleteAsset(asset.Replace(asset.Substring(asset.LastIndexOf("."), asset.Length - asset.LastIndexOf(".")), ".bytes"));
+                        System.IO.File.Delete(asset + ".bytes");
                     }
                 }
             }
+            AssetDatabase.Refresh();
         }
 
     }

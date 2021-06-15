@@ -17,10 +17,11 @@ namespace AssetSystem
             return true;
         }
 
-        public virtual bool CheckRemoteVersion(string localVersion, string remoteVersion)
+        public virtual void CheckRemoteVersion(string localVersion, string remoteVersion, Action<bool> updateCall)
         {
             Debug.Log("CheckAssetVersion    " + "local:" + localVersion + "  remote:" + remoteVersion);
-            return localVersion.Equals(remoteVersion);
+            // 这里做成异步， 非强更类型可以弹出提示框让玩家选择更新
+            updateCall.Invoke(localVersion.Equals(remoteVersion));
         }
 
         public virtual void Download(string url, Action<long> process, Action<bool, byte[]> resultCallBack)

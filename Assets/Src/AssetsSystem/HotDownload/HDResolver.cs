@@ -144,12 +144,43 @@ namespace AssetSystem
 
         public static string ReadFile(string path)
         {
+            string targer = string.Empty;
             using (StreamReader sr = new StreamReader(path))
             {
-                return sr.ReadToEnd();
+                targer = sr.ReadToEnd();
+                sr.Close();
+            }
+            return targer;
+        }
+
+        public static void WriteFileLine(string path, string line)
+        {
+            using (StreamWriter sw = new StreamWriter(path, true))
+            {
+                sw.WriteLine(line);
+                sw.Flush();
+                sw.Close();
             }
         }
 
+        public static string ReadFileLine(string path)
+        {
+            string line = string.Empty;
+            string surplus = string.Empty;
+            using (StreamReader sr = new StreamReader(path))
+            {
+                line = sr.ReadLine();
+                surplus = sr.ReadToEnd();
+                sr.Close();
+            }
+            using (StreamWriter sw = new StreamWriter(path, false))
+            {
+                sw.Write(surplus);
+                sw.Flush();
+                sw.Close();
+            }
+            return line;
+        }
 
         public static string GetFileHash(string filePath)
         {

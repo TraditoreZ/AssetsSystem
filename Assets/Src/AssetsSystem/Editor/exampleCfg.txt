@@ -30,4 +30,6 @@ Assets/Scenes/(\w*) => {0}_level
 
 Assets/GameRes/lua/.+ => main_lua
 
-CustomVideo/.+ => video : binary mp4
+Assets/CustomVideo/.+ => video : binary | unzip
+
+Assets/Lua/.+ => lua : immortal | binary | unzip
