@@ -21,7 +21,7 @@ namespace AssetSystem
         {
             Debug.Log("CheckAssetVersion    " + "local:" + localVersion + "  remote:" + remoteVersion);
             // 这里做成异步， 非强更类型可以弹出提示框让玩家选择更新
-            updateCall.Invoke(localVersion.Equals(remoteVersion));
+            updateCall.Invoke(!localVersion.Equals(remoteVersion));
         }
 
         public virtual void Download(string url, Action<long> process, Action<bool, byte[]> resultCallBack)
@@ -126,5 +126,11 @@ namespace AssetSystem
             }
         }
 
+        public bool IsFirstRun()
+        {
+            string localPath = AssetBundlePathResolver.instance.GetBundlePersistentFile("version.txt");
+            return System.IO.Directory.GetFiles(AssetBundlePathResolver.instance.GetBundlePersistentFile()).Length == 0
+            && System.IO.Directory.GetDirectories(AssetBundlePathResolver.instance.GetBundlePersistentFile()).Length == 0;
+        }
     }
 }

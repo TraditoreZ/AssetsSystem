@@ -103,7 +103,6 @@ public class GameMain : MonoBehaviour
 
     private void ProcessCallBack(string assetName, long currtSize, long maxSize, int index, int count)
     {
-        Debug.Log(string.Format("{0} kb / {1} kb  {2:f2}%    {3:f2} mb/s", currtSize / 1024, maxSize / 1024, ((float)currtSize / maxSize) * 100, AssetDownload.instance.downloader.DownloadSpeed() / (1024 * 1024)));
         progress.value = (float)currtSize / maxSize;
         progressText.text = string.Format("{0} kb / {1} kb  {2:f2}%    {3:f2} mb/s", currtSize / 1024, maxSize / 1024, ((float)currtSize / maxSize) * 100, AssetDownload.instance.downloader.DownloadSpeed() / (1024 * 1024));
     }

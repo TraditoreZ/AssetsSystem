@@ -104,6 +104,12 @@ namespace AssetSystem
                     case EHotDownloadProgress.UnzipBinary:
                         UnzipBinary(arms[0].ToString());
                         break;
+                    case EHotDownloadProgress.CheckFirstRun:
+                        CheckFirstRun();
+                        break;
+                    case EHotDownloadProgress.FirstRunUnzipBinary:
+                        FirstRunUnzipBinary();
+                        break;
                     case EHotDownloadProgress.Over:
                         Debug.Log("ResourceUpdateFinish");
                         System.GC.Collect();
@@ -142,7 +148,7 @@ namespace AssetSystem
         void CheckPersistentResource()
         {
             if (downloader.CheckPersistentResource())
-                UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
+                UpdateProcess(EHotDownloadProgress.CheckFirstRun);
             else
                 UpdateProcess(EHotDownloadProgress.ClearPersistentResource);
         }
@@ -152,7 +158,7 @@ namespace AssetSystem
             // 清理所有
             System.IO.Directory.Delete(AssetBundlePathResolver.instance.GetBundlePersistentFile(), true);
             System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
-            UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
+            UpdateProcess(EHotDownloadProgress.CheckFirstRun);
         }
 
         void DownloadModifyList(string version)
@@ -289,10 +295,26 @@ namespace AssetSystem
 
         void UnzipBinary(string version)
         {
-            StartCoroutine(IEUnzipBinary(version));
+            StartCoroutine(IEUnzipBinary(() =>
+            {
+                UpdateProcess(EHotDownloadProgress.FinishDownload, version);
+            }));
         }
 
-        IEnumerator IEUnzipBinary(string version)
+        void FirstRunUnzipBinary()
+        {
+            string[] packages = HDResolver.GetBundleSourceFileBundles();
+            foreach (var package in packages)
+            {
+                HDResolver.WriteFileLine(GetUnzipPath(), package);
+            }
+            StartCoroutine(IEUnzipBinary(() =>
+            {
+                UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
+            }));
+        }
+
+        IEnumerator IEUnzipBinary(Action callBack)
         {
             yield return null;
             AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
@@ -320,12 +342,12 @@ namespace AssetSystem
                 }
             } while (!string.IsNullOrEmpty(assetName));
             System.IO.File.Delete(GetUnzipPath());
-            UpdateProcess(EHotDownloadProgress.FinishDownload, version);
+            callBack?.Invoke();
         }
 
         void UnzipCell(string assetName)
         {
-            AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundlePersistentFile(assetName));
+            AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(assetName));
             string[] names = ab.GetAllAssetNames();
             foreach (var name in names)
             {
@@ -342,6 +364,18 @@ namespace AssetSystem
                 }
             }
             ab.Unload(true);
+        }
+
+        void CheckFirstRun()
+        {
+            if (downloader.IsFirstRun())
+            {
+                UpdateProcess(EHotDownloadProgress.FirstRunUnzipBinary);
+            }
+            else
+            {
+                UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
+            }
         }
 
         string GetBreakpointPath(string version)

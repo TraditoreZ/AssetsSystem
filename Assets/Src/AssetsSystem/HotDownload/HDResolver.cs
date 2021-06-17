@@ -220,5 +220,14 @@ namespace AssetSystem
             }
         }
 
+        public static string[] GetBundleSourceFileBundles()
+        {
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
+            AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            string[] bundles = allManifest.GetAllAssetBundles();
+            assetBundle.Unload(true);
+            return bundles;
+        }
+
     }
 }

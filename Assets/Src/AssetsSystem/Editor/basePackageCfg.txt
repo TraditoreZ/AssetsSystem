@@ -27,3 +27,5 @@ Assets/Res/Shaders/(.+/)?.+ => main_shaders : immortal
 
 // 场景
 //Assets/Scenes/(\w*) => {0}_level
+
+Assets/Lua/.+ => lua : immortal | binary | unzip

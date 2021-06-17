@@ -15,6 +15,8 @@
         ClearPersistentResource = 10,
         CheckUnzipBinary = 11,
         UnzipBinary = 12,
-        Over = 13,
+        CheckFirstRun = 13,
+        FirstRunUnzipBinary = 14,
+        Over = 15,
     }
 }

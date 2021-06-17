@@ -16,7 +16,8 @@ namespace AssetSystem
         void GetLocalVersion(Action<string> result);
         // 接口返回是否保留Persistent下资源 可用于新包删除旧的缓存资源
         bool CheckPersistentResource();
-
+        // 是否为新包首次运行
+        bool IsFirstRun();
         void Download(string url, Action<long> process, Action<bool, byte[]> resultCallBack);
         // 每秒下载速度
         float DownloadSpeed();
