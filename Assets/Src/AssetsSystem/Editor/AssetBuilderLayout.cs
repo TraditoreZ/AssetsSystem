@@ -48,13 +48,13 @@ namespace AssetEditor
             GUILayout.Label(editorData.baseConfigPath);
             if (GUILayout.Button("选择路径", GUILayout.Width(100), GUILayout.Height(20)))
             {
-                editorData.baseConfigPath = EditorUtility.OpenFolderPanel("【母包规则配置】", "", "");
+                editorData.baseConfigPath = EditorUtility.OpenFilePanel("【母包规则配置】", "", "");
             }
             GUILayout.Label("【分包规则配置】");
             GUILayout.Label(editorData.splitConfigPath);
             if (GUILayout.Button("选择路径", GUILayout.Width(100), GUILayout.Height(20)))
             {
-                editorData.splitConfigPath = EditorUtility.OpenFolderPanel("【分包规则配置】", "", "");
+                editorData.splitConfigPath = EditorUtility.OpenFilePanel("【分包规则配置】", "", "");
             }
             GUILayout.Label("【分包根目录】");
             GUILayout.Label(editorData.incrementPath);
@@ -87,7 +87,7 @@ namespace AssetEditor
 
             if (GUILayout.Button("开始打包", GUILayout.Width(142), GUILayout.Height(30)))
             {
-                AssetBuilder.BuildAssetBundle(editorData.increment ? editorData.splitConfigPath : editorData.baseConfigPath, editorData.options, editorData.lastBuildTarger, editorData.increment);
+                AssetBuilder.BuildAssetBundle(editorData.increment ? editorData.splitConfigPath : editorData.baseConfigPath, editorData.options, editorData.lastBuildTarger);
                 AssetBuilder.BuildManifest(editorData.version, editorData.lastBuildTarger);
                 if (editorData.increment)
                 {
@@ -98,7 +98,7 @@ namespace AssetEditor
                 else
                 {
                     AssetBuilder.CreateAssetVersion(editorData.lastBuildTarger, editorData.version);
-                    AssetBuilder.Move2Project(editorData.lastBuildTarger);
+                    AssetBuilder.Move2Project(editorData.version, editorData.lastBuildTarger);
                     AssetBuilder.Move2Package(editorData.version, editorData.lastBuildTarger, editorData.incrementPath);
                 }
             }

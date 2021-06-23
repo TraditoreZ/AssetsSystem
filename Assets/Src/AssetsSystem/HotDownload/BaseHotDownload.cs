@@ -10,6 +10,7 @@ namespace AssetSystem
     public class BaseHotDownload : IAssetHotDownload
     {
         private const int mathSpeedCount = 30;
+        private const int reConnectionCount = 3;
         private Queue<float> downLoadSpeeds = new Queue<float>();
 
         public virtual bool CheckPersistentResource()
@@ -35,7 +36,7 @@ namespace AssetSystem
             }, (byteSize) =>
             {
                 process?.Invoke((long)byteSize);
-            }));
+            }, reConnectionCount));
         }
 
         public float DownloadSpeed()
@@ -88,7 +89,7 @@ namespace AssetSystem
             HDResolver.WriteFile(localPath, version);
         }
 
-        private IEnumerator LoadResourceCorotine(string url, Action<byte[]> downloadOverCall, Action<string> errorCall, Action<ulong> downLoadBytes)
+        private IEnumerator LoadResourceCorotine(string url, Action<byte[]> downloadOverCall, Action<string> errorCall, Action<ulong> downLoadBytes, int reConnectionCount)
         {
             UnityWebRequest www = new UnityWebRequest(url);
             DownloadHandlerBuffer dH = new DownloadHandlerBuffer();
@@ -106,9 +107,17 @@ namespace AssetSystem
             }
             if (www.isHttpError || www.isNetworkError)
             {
-                Debug.LogError(www.error);
-                errorCall?.Invoke(www.error);
-                yield break;
+                if (reConnectionCount > 0)
+                {
+                    Debug.LogWarning("www is error try reConnection :" + reConnectionCount);
+                    yield return LoadResourceCorotine(url, downloadOverCall, errorCall, downLoadBytes, reConnectionCount - 1);
+                }
+                else
+                {
+                    Debug.LogError(www.error);
+                    errorCall?.Invoke(www.error);
+                    yield break;
+                }
             }
             if (www.isDone)
             {

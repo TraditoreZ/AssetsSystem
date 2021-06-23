@@ -20,6 +20,7 @@ namespace AssetSystem
                 {
                     GameObject go = new GameObject("AssetDownload");
                     _instance = go.AddComponent<AssetDownload>();
+                    GameObject.DontDestroyOnLoad(go);
                 }
                 return _instance;
             }
@@ -59,6 +60,20 @@ namespace AssetSystem
             if (!System.IO.Directory.Exists(AssetBundlePathResolver.instance.GetBundlePersistentFile()))
                 System.IO.Directory.CreateDirectory(AssetBundlePathResolver.instance.GetBundlePersistentFile());
             instance.UpdateProcess(EHotDownloadProgress.CheckPersistentResource);
+        }
+
+        public static void CheckUpdate(Action<bool> versionCall)
+        {
+            instance.downloader.GetRemoteVersion((remoteVersion) =>
+            {
+                instance.downloader.GetLocalVersion((localVersion) =>
+                {
+                    instance.downloader.CheckRemoteVersion(localVersion, remoteVersion, (update) =>
+                    {
+                        versionCall(update);
+                    });
+                });
+            });
         }
 
         void UpdateProcess(EHotDownloadProgress progress, params object[] arms)
@@ -219,6 +234,7 @@ namespace AssetSystem
             string assetName = data.datas[index].name;
             string url = string.Format("{0}/{1}/{2}", remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime(), assetName);
             int nextIndex = index + 1;
+            downLoadCurrtSize = 0;
             downloader.Download(url, (currtSize) =>
             {
                 ProcessEvent?.Invoke(assetName, downLoadCurrtSize + currtSize, downLoadMaxSize, nextIndex, data.datas.Length);
@@ -303,15 +319,32 @@ namespace AssetSystem
 
         void FirstRunUnzipBinary()
         {
-            string[] packages = HDResolver.GetBundleSourceFileBundles();
-            foreach (var package in packages)
+            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile("bundle.rule"));
+            string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            ruleAB.Unload(true);
+            var rules = new List<AssetBundleRule>();
+            AssetBundleBuildConfig.ResolveRule(rules, commands);
+            foreach (var rule in rules)
             {
-                HDResolver.WriteFileLine(GetUnzipPath(), package);
+                if (rule.options.Where(item => item.Contains("binary")).Count() > 0
+                && rule.options.Where(item => item.Contains("unzip")).Count() > 0)
+                {
+                    Debug.Log("待解压本地资源:" + rule.packName);
+                    HDResolver.WriteFileLine(GetUnzipPath(), rule.packName);
+                }
             }
-            StartCoroutine(IEUnzipBinary(() =>
+            if (File.Exists(GetUnzipPath()))
+            {
+                StartCoroutine(IEUnzipBinary(() =>
+                {
+                    UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
+                }));
+            }
+            else
             {
                 UpdateProcess(EHotDownloadProgress.CheckRemoteVersion);
-            }));
+            }
+
         }
 
         IEnumerator IEUnzipBinary(Action callBack)
@@ -337,9 +370,11 @@ namespace AssetSystem
                         {
                             Debug.Log("解压资源:" + rule.packName);
                             UnzipCell(rule.packName);
+                            yield return null;
                         }
                     }
                 }
+                HDResolver.DeleteFileLine(GetUnzipPath());
             } while (!string.IsNullOrEmpty(assetName));
             System.IO.File.Delete(GetUnzipPath());
             callBack?.Invoke();
@@ -351,7 +386,7 @@ namespace AssetSystem
             string[] names = ab.GetAllAssetNames();
             foreach (var name in names)
             {
-                string targerPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(name.Replace(".bytes", "").Replace("assets/", ""));
+                string targerPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(name.Substring(0, name.Length - 6).Replace("assets/", ""));
                 if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(targerPath)))
                 {
                     System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(targerPath));

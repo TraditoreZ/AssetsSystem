@@ -166,10 +166,20 @@ namespace AssetSystem
         public static string ReadFileLine(string path)
         {
             string line = string.Empty;
-            string surplus = string.Empty;
             using (StreamReader sr = new StreamReader(path))
             {
                 line = sr.ReadLine();
+                sr.Close();
+            }
+            return line;
+        }
+
+        public static void DeleteFileLine(string path)
+        {
+            string surplus = string.Empty;
+            using (StreamReader sr = new StreamReader(path))
+            {
+                sr.ReadLine();
                 surplus = sr.ReadToEnd();
                 sr.Close();
             }
@@ -179,7 +189,6 @@ namespace AssetSystem
                 sw.Flush();
                 sw.Close();
             }
-            return line;
         }
 
         public static string GetFileHash(string filePath)

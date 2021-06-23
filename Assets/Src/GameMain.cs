@@ -172,6 +172,14 @@ public class GameMain : MonoBehaviour
             }
             videoPlayer.Play();
         }
+        if (GUILayout.Button("测试内存", GUILayout.Width(200), GUILayout.Height(70)))
+        {
+            var go = Asset.Load<GameObject>("Res/Actor/2001_player_wumingdj/2001_player_wumingdj");
+            var instance = Instantiate(go, new Vector3(Random.Range(-3f, 3f), 0, 0), Quaternion.identity);
+            //objs.Add(instance);
+            Asset.Unload("Res/Actor/2001_player_wumingdj/2001_player_wumingdj");
+            DestroyImmediate(instance);
+        }
         // if (GUILayout.Button("热更新"))
         // {
         //     //AssetDownload.ResourceUpdateOnRemote(@"E:\AssetsSystem\HotDownload", new BaseHotDownload());

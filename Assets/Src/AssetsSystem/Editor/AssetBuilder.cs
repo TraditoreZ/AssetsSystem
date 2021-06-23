@@ -27,7 +27,7 @@ namespace AssetEditor
             File.Copy(Path.Combine(GetOutPath(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)), Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version)), true);
         }
 
-        public static void BuildAssetBundle(BuildTarget buildTarget, bool increment)
+        public static void BuildAssetBundle(string verson, BuildTarget buildTarget)
         {
             AssetEditorData data = null;
             var paths = AssetDatabase.FindAssets("t:AssetEditorData");
@@ -39,7 +39,11 @@ namespace AssetEditor
             {
                 throw new System.Exception("Not find EditorData.asset");
             }
-            BuildAssetBundle(data.splitConfigPath, data.options, buildTarget, increment);
+            if (!string.IsNullOrEmpty(verson))
+            {
+                data.version = verson;
+            }
+            BuildAssetBundle(data.splitConfigPath, data.options, buildTarget);
         }
 
         public static void GenerateModifyList(BuildTarget buildTarget, string currtVersion, string sourceVersion)
@@ -62,16 +66,12 @@ namespace AssetEditor
         }
 
 
-        public static void BuildAssetBundle(string configPath, BuildAssetBundleOptions options, BuildTarget buildTarget = BuildTarget.StandaloneWindows64, bool increment = false)
+        public static void BuildAssetBundle(string configPath, BuildAssetBundleOptions options, BuildTarget buildTarget = BuildTarget.StandaloneWindows64)
         {
             System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
             Dictionary<string, ABPackage> packsDic = null;
             try
             {
-                if (!increment)
-                {
-                    ClearBundles(GetOutPath(buildTarget));
-                }
                 if (!System.IO.Directory.Exists(GetOutPath(buildTarget)))
                 {
                     System.IO.Directory.CreateDirectory(GetOutPath(buildTarget));
@@ -120,8 +120,9 @@ namespace AssetEditor
                     abbLists.Add(abb);
                 }
                 AssetBundleBuild configABB = new AssetBundleBuild();
+                string rulePath = configPath.Replace(Application.dataPath, "Assets");
                 configABB.assetBundleName = "bundle.rule";
-                configABB.assetNames = new string[] { configPath.EndsWith(".txt") ? configPath : configPath + ".txt" };
+                configABB.assetNames = new string[] { rulePath.EndsWith(".txt") ? rulePath : rulePath + ".txt" };
                 abbLists.Add(configABB);
 
                 watch.Reset();
@@ -172,6 +173,17 @@ namespace AssetEditor
                 cell.fileHash = HDResolver.GetFileHash(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name));
                 cell.size = (new System.IO.FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name))).Length;
             }
+            // 将bundle.rule放入最后一位,这样更新的时候rule也是最后一个更新
+            for (int i = 0; i < modifyJson.datas.Length; i++)
+            {
+                if (modifyJson.datas[i].name.Equals("bundle.rule"))
+                {
+                    ModifyData.ModifyCell temp = modifyJson.datas[i];
+                    modifyJson.datas[i] = modifyJson.datas[modifyJson.datas.Length - 1];
+                    modifyJson.datas[modifyJson.datas.Length - 1] = temp;
+                    break;
+                }
+            }
             using (StreamWriter sw = new StreamWriter(outPath, false))
             {
                 sw.Write(JsonUtility.ToJson(modifyJson));
@@ -217,11 +229,17 @@ namespace AssetEditor
             return AssetBundlePathResolver.BundleOutputPath(buildTarget) + "_Data";
         }
 
-        public static void Move2Project(BuildTarget buildTarget)
+        public static void Move2Project(string version, BuildTarget buildTarget)
         {
             string targer = string.Format("{0}/StreamingAssets/{1}", Application.dataPath, AssetBundlePathResolver.instance.BundleSaveDirName);
             ClearBundles(targer);
-            CopyBundle(GetOutPath(buildTarget), targer, true);
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version)));
+            AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            string[] bundles = allManifest.GetAllAssetBundles();
+            assetBundle.Unload(true);
+            CopyBundle(bundles, GetOutPath(buildTarget), targer, true);
+            CopyFile(AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget), GetOutPath(buildTarget), targer, true);
+            CopyFile("version.txt", GetOutPath(buildTarget), targer, true);
             AssetDatabase.Refresh();
         }
 
@@ -231,8 +249,14 @@ namespace AssetEditor
             {
                 System.IO.Directory.CreateDirectory(Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget) + "_Data"));
             }
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version)));
+            AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            string[] bundles = allManifest.GetAllAssetBundles();
+            assetBundle.Unload(true);
             // 复制Bundle
-            CopyBundle(GetOutPath(buildTarget), packagePath, true);
+            CopyBundle(bundles, GetOutPath(buildTarget), packagePath, true);
+            CopyFile(AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget), GetOutPath(buildTarget), packagePath, true);
+            CopyFile("version.txt", GetOutPath(buildTarget), packagePath, true);
             // 复制Mainfest信息
             if (System.IO.File.Exists(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version))))
             {
@@ -252,20 +276,23 @@ namespace AssetEditor
             HDResolver.WriteFile(outPath, version);
         }
 
-        static void CopyBundle(string srcdir, string dstdir, bool overwrite)
+        static void CopyBundle(string[] bundles, string srcdir, string dstdir, bool overwrite)
         {
             string todir = Path.Combine(dstdir, Path.GetFileName(srcdir));
             if (!Directory.Exists(todir))
                 Directory.CreateDirectory(todir);
-            foreach (var s in Directory.GetFiles(srcdir))
+            foreach (var bundle in bundles)
             {
-                if (!s.EndsWith(".meta") && !s.EndsWith(".manifest") && !s.EndsWith(cfg_AllBundleMD5))
-                {
-                    File.Copy(s, Path.Combine(todir, Path.GetFileName(s)), overwrite);
-                }
+                File.Copy(Path.Combine(srcdir, Path.GetFileName(bundle)), Path.Combine(todir, Path.GetFileName(bundle)), overwrite);
             }
-            foreach (var s in Directory.GetDirectories(srcdir))
-                CopyBundle(s, todir, overwrite);
+        }
+
+        static void CopyFile(string file, string srcdir, string dstdir, bool overwrite)
+        {
+            string todir = Path.Combine(dstdir, Path.GetFileName(srcdir));
+            if (!Directory.Exists(todir))
+                Directory.CreateDirectory(todir);
+            File.Copy(Path.Combine(srcdir, Path.GetFileName(file)), Path.Combine(todir, Path.GetFileName(file)), overwrite);
         }
 
 
