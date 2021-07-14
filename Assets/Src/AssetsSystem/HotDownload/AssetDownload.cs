@@ -34,15 +34,12 @@ namespace AssetSystem
 
         public delegate void DownloadDelegate(EHotDownloadProgress progress);
         public event DownloadDelegate DownloadEvent;
-        public delegate void DownloadProcessDelegate(string assetName, long currtSize, long maxSize, int index, int count);
+        public delegate void DownloadProcessDelegate(long currtSize, long maxSize, long speed);
         public event DownloadProcessDelegate ProcessEvent;
         public delegate void ErrorDelegate(string error);
         public event ErrorDelegate ErrorEvent;
         public delegate void HotDownloadOverDelegate();
         public event HotDownloadOverDelegate HotDownloadOverEvent;
-
-        private long downLoadCurrtSize;
-        private long downLoadMaxSize;
 
         private bool checkFileMD5;
 
@@ -92,9 +89,6 @@ namespace AssetSystem
                     case EHotDownloadProgress.CheckRemoteVersion:
                         CheckRemoteVersion();
                         break;
-                    case EHotDownloadProgress.CheckBreakpoint:
-                        CheckBreakpoint(arms[0].ToString(), arms[1] as ModifyData);
-                        break;
                     case EHotDownloadProgress.DownloadModifyList:
                         DownloadModifyList(arms[0].ToString());
                         break;
@@ -105,7 +99,7 @@ namespace AssetSystem
                         CompareAssetHash(arms[0].ToString(), arms[1] as ModifyData);
                         break;
                     case EHotDownloadProgress.DownloadAssets:
-                        DownloadAssets(arms[0].ToString(), arms[1] as ModifyData, (int)arms[2]);
+                        DownloadAssets(arms[0].ToString(), arms[1] as ModifyData);
                         break;
                     case EHotDownloadProgress.DownloadManifest:
                         DownloadManifest(arms[0].ToString(), arms[1] as ModifyData);
@@ -206,66 +200,42 @@ namespace AssetSystem
         void CompareAssetHash(string version, ModifyData data)
         {
             if (HDResolver.IsPersistAssetNeedUpdate(ref data, checkFileMD5))
-                UpdateProcess(EHotDownloadProgress.CheckBreakpoint, version, data);
+                UpdateProcess(EHotDownloadProgress.DownloadAssets, version, data);
             else
                 UpdateProcess(EHotDownloadProgress.CheckUnzipBinary, version);
         }
 
-        void CheckBreakpoint(string version, ModifyData data)
-        {
-            int index = 0;
-            if (System.IO.File.Exists(GetBreakpointPath(version)))
-            {
-                int.TryParse(HDResolver.ReadFile(GetBreakpointPath(version)), out index);
-            }
-            if (index < 0 || index > data.datas.Length)
-            {
-                index = 0;
-            }
-            downLoadMaxSize = 0;
-            for (int i = index; i < data.datas.Length; i++)
-                downLoadMaxSize += data.datas[i].size;
-            UpdateProcess(EHotDownloadProgress.DownloadAssets, version, data, index);
-        }
 
 
-        void DownloadAssets(string version, ModifyData data, int index)
+        void DownloadAssets(string version, ModifyData data)
         {
-            string assetName = data.datas[index].name;
-            string url = string.Format("{0}/{1}/{2}", remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime(), assetName);
-            int nextIndex = index + 1;
-            downLoadCurrtSize = 0;
-            downloader.Download(url, (currtSize) =>
+            DownloadReqData[] datas = new DownloadReqData[data.datas.Length];
+            for (int i = 0; i < data.datas.Length; i++)
             {
-                ProcessEvent?.Invoke(assetName, downLoadCurrtSize + currtSize, downLoadMaxSize, nextIndex, data.datas.Length);
-            },
-            (ok, bytes) =>
+                ModifyData.ModifyCell cell = data.datas[i];
+                string hashName = cell.bundleHash + Path.GetExtension(cell.name);
+                datas[i] = new DownloadReqData()
+                {
+                    url = string.Format("{0}/{1}/{2}", remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime(), hashName),
+                    filePath = AssetBundlePathResolver.instance.GetBundlePersistentFile(hashName),
+                    size = cell.size
+                };
+                // 用于下载完成后解压用
+                HDResolver.WriteFileLine(GetUnzipPath(), cell.name);
+            }
+            CoroutineHttpDownload.instance.DownloadFile(datas, (ok) =>
             {
                 if (ok)
                 {
-                    string localPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(assetName);
-                    using (System.IO.FileStream fs = new System.IO.FileStream(localPath, System.IO.FileMode.Create))
-                    {
-                        fs.Write(bytes, 0, bytes.Length);
-                        fs.Close();
-                    }
-                    HDResolver.WriteFileLine(GetUnzipPath(), assetName);
-                    downLoadCurrtSize += bytes.Length;
-                    if (nextIndex >= data.datas.Length)
-                    {
-                        System.IO.File.Delete(GetBreakpointPath(version));
-                        UpdateProcess(EHotDownloadProgress.DownloadManifest, version, data);
-                    }
-                    else
-                    {
-                        HDResolver.WriteFile(GetBreakpointPath(version), (nextIndex).ToString());
-                        DownloadAssets(version, data, nextIndex);
-                    }
+                    UpdateProcess(EHotDownloadProgress.DownloadManifest, version, data);
                 }
                 else
                 {
-                    ErrorEvent?.Invoke("DownloadAssets Fail");
+                    ErrorEvent?.Invoke("DownloadAssets Error");
                 }
+            }, (downLoadCurrtSize, downLoadMaxSize, speedPreSecond) =>
+            {
+                ProcessEvent?.Invoke(downLoadCurrtSize, downLoadMaxSize, speedPreSecond);
             });
         }
 
@@ -319,8 +289,12 @@ namespace AssetSystem
 
         void FirstRunUnzipBinary()
         {
-            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile("bundle.rule"));
+            AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
+            AssetBundleManifest allManifest = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            ulong offset = HDResolver.BundleOffset("bundle.rule");
+            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile(allManifest.GetAssetBundleHash("bundle.rule") + ".rule"), 0, offset);
             string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            ab.Unload(true);
             ruleAB.Unload(true);
             var rules = new List<AssetBundleRule>();
             AssetBundleBuildConfig.ResolveRule(rules, commands);
@@ -350,9 +324,11 @@ namespace AssetSystem
         IEnumerator IEUnzipBinary(Action callBack)
         {
             yield return null;
-            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
+            AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
+            AssetBundleManifest allManifest = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            ulong offset = HDResolver.BundleOffset("bundle.rule");
+            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(allManifest.GetAssetBundleHash("bundle.rule") + ".rule"), 0, offset);
             string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            ruleAB.Unload(true);
             var rules = new List<AssetBundleRule>();
             AssetBundleBuildConfig.ResolveRule(rules, commands);
 
@@ -368,21 +344,25 @@ namespace AssetSystem
                         && rule.options.Where(item => item.Contains("binary")).Count() > 0
                         && rule.options.Where(item => item.Contains("unzip")).Count() > 0)
                         {
-                            Debug.Log("解压资源:" + rule.packName);
-                            UnzipCell(rule.packName);
+                            string assetHashPath = allManifest.GetAssetBundleHash(assetName) + Path.GetExtension(assetName);
+                            Debug.Log("解压资源:" + rule.packName + "\r\n哈希路径:" + assetHashPath);
+                            UnzipCell(assetName, assetHashPath);
                             yield return null;
                         }
                     }
                 }
                 HDResolver.DeleteFileLine(GetUnzipPath());
             } while (!string.IsNullOrEmpty(assetName));
+            ab.Unload(true);
+            ruleAB.Unload(true);
             System.IO.File.Delete(GetUnzipPath());
             callBack?.Invoke();
         }
 
-        void UnzipCell(string assetName)
+        void UnzipCell(string assetName, string fileName)
         {
-            AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(assetName));
+            ulong offset = HDResolver.BundleOffset(assetName);
+            AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(fileName), 0, offset);
             string[] names = ab.GetAllAssetNames();
             foreach (var name in names)
             {
@@ -413,10 +393,6 @@ namespace AssetSystem
             }
         }
 
-        string GetBreakpointPath(string version)
-        {
-            return AssetBundlePathResolver.instance.GetBundlePersistentFile(string.Format("v{0}.breakpoint", version));
-        }
 
         string GetUnzipPath()
         {

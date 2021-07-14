@@ -9,7 +9,6 @@ namespace AssetSystem
         {
             public string name;
             public string bundleHash;
-            public string fileHash;
             public long size;
         }
 

@@ -10,7 +10,6 @@
         CompareAssetHash = 5,
         DownloadAssets = 6,
         FinishDownload = 7,
-        CheckBreakpoint = 8,
         DownloadManifest = 9,
         ClearPersistentResource = 10,
         CheckUnzipBinary = 11,

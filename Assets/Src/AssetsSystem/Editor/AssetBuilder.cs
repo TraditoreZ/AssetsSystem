@@ -170,7 +170,6 @@ namespace AssetEditor
                 modifyJson.datas[index++] = cell;
                 cell.name = item.Key;
                 cell.bundleHash = item.Value;
-                cell.fileHash = HDResolver.GetFileHash(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name));
                 cell.size = (new System.IO.FileInfo(System.IO.Path.Combine(GetOutPath(buildTarget), cell.name))).Length;
             }
             // 将bundle.rule放入最后一位,这样更新的时候rule也是最后一个更新
@@ -213,7 +212,7 @@ namespace AssetEditor
                     }
                     if (pack.assets.Add(assetPath) && File.Exists(assetPath))
                     {
-                        pack.size_MB += (new System.IO.FileInfo(assetPath).Length / 1048576f); // byte => mb
+                        pack.size_MB += ((new System.IO.FileInfo(assetPath).Length + HDResolver.BundleOffset(Path.GetFileName(assetPath)) / 1048576f)); // byte => mb
                     }
                 }
             }
@@ -236,27 +235,51 @@ namespace AssetEditor
             AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version)));
             AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
             string[] bundles = allManifest.GetAllAssetBundles();
-            assetBundle.Unload(true);
+            assetBundle.Unload(false);
             CopyBundle(bundles, GetOutPath(buildTarget), targer, true);
             CopyFile(AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget), GetOutPath(buildTarget), targer, true);
             CopyFile("version.txt", GetOutPath(buildTarget), targer, true);
+            EncryptedBundle(bundles, allManifest, Path.Combine(targer, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)));
             AssetDatabase.Refresh();
         }
 
         public static void Move2Package(string version, BuildTarget buildTarget, string packagePath)
         {
+            if (!System.IO.Directory.Exists(Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget))))
+            {
+                System.IO.Directory.CreateDirectory(Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)));
+            }
             if (!System.IO.Directory.Exists(Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget) + "_Data")))
             {
                 System.IO.Directory.CreateDirectory(Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget) + "_Data"));
             }
             AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version)));
             AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-            string[] bundles = allManifest.GetAllAssetBundles();
-            assetBundle.Unload(true);
+            assetBundle.Unload(false);
+            string targerManifestPath = Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget), AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget));
+            string[] bundles = null;
+            if (File.Exists(targerManifestPath))
+            {
+                AssetBundle packageBundle = AssetBundle.LoadFromFile(targerManifestPath);
+                AssetBundleManifest packageManifest = packageBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                packageBundle.Unload(false);
+                List<string> changedBundle = new List<string>();
+                foreach (var bundle in allManifest.GetAllAssetBundles())
+                {
+                    if (allManifest.GetAssetBundleHash(bundle) != packageManifest.GetAssetBundleHash(bundle))
+                        changedBundle.Add(bundle);
+                }
+                bundles = changedBundle.ToArray();
+            }
+            else
+            {
+                bundles = allManifest.GetAllAssetBundles();
+            }
             // 复制Bundle
             CopyBundle(bundles, GetOutPath(buildTarget), packagePath, true);
             CopyFile(AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget), GetOutPath(buildTarget), packagePath, true);
             CopyFile("version.txt", GetOutPath(buildTarget), packagePath, true);
+            EncryptedBundle(bundles, allManifest, Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget)));
             // 复制Mainfest信息
             if (System.IO.File.Exists(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetManifestName(version))))
             {
@@ -357,6 +380,29 @@ namespace AssetEditor
                 }
             }
             AssetDatabase.Refresh();
+        }
+
+        static void EncryptedBundle(string[] bundles, AssetBundleManifest manifest, string path)
+        {
+            byte[] sourceBytes = new byte[1048576];
+            foreach (var bundle in bundles)
+            {
+                string newBundlePath = Path.Combine(path, bundle.Replace(Path.GetFileNameWithoutExtension(bundle), manifest.GetAssetBundleHash(bundle).ToString()));
+                File.Move(Path.Combine(path, Path.GetFileName(bundle)), newBundlePath);
+                // TODO bundle加密部分
+                ulong offset = HDResolver.BundleOffset(bundle);
+                Debug.Log("bundle:" + bundle + "    offset:" + offset);
+                using (var fileStream = new FileStream(newBundlePath, FileMode.Open, FileAccess.ReadWrite))
+                {
+                    if (sourceBytes.Length < fileStream.Length)
+                    {
+                        sourceBytes = new byte[fileStream.Length];
+                    }
+                    fileStream.Read(sourceBytes, 0, (int)fileStream.Length);
+                    fileStream.Seek((int)offset, SeekOrigin.Begin);
+                    fileStream.Write(sourceBytes, 0, (int)fileStream.Length);
+                }
+            }
         }
 
     }

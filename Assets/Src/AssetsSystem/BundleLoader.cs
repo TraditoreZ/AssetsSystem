@@ -13,7 +13,8 @@ namespace AssetSystem
     internal class BundleLoader : BaseAssetLoader
     {
         private List<AssetBundleRule> rules;
-        private Dictionary<string, string[]> allDependencies;
+        public static Dictionary<string, string[]> allDependencies;
+        public static Dictionary<string, string> bundleHashDic;
         public override void Initialize(string root)
         {
             base.Initialize(root);
@@ -305,14 +306,17 @@ namespace AssetSystem
                 AssetBundle assetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
                 AssetBundleManifest allManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
                 allDependencies = new Dictionary<string, string[]>();
+                bundleHashDic = new Dictionary<string, string>();
                 var bundles = allManifest.GetAllAssetBundles();
                 foreach (var bundle in bundles)
                 {
+                    bundleHashDic.Add(bundle, allManifest.GetAssetBundleHash(bundle).ToString());
                     allDependencies.Add(bundle, allManifest.GetAllDependencies(bundle));
                 }
-                assetBundle.Unload(true);
-                AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime("bundle.rule"));
+                ulong offset = HDResolver.BundleOffset("bundle.rule");
+                AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(allManifest.GetAssetBundleHash("bundle.rule") + ".rule"), 0, offset);
                 string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                assetBundle.Unload(true);
                 ruleAB.Unload(true);
                 rules = new List<AssetBundleRule>();
                 AssetBundleBuildConfig.ResolveRule(rules, commands);

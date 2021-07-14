@@ -19,7 +19,5 @@ namespace AssetSystem
         // 是否为新包首次运行
         bool IsFirstRun();
         void Download(string url, Action<long> process, Action<bool, byte[]> resultCallBack);
-        // 每秒下载速度
-        float DownloadSpeed();
     }
 }

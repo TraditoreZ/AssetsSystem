@@ -19,14 +19,16 @@ namespace AssetSystem
         public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
             base.LoadPackage(packagePath, async, callBack);
+            string hashPath = packagePath.Replace(System.IO.Path.GetFileNameWithoutExtension(packagePath), BundleLoader.bundleHashDic[packagePath]);
+            ulong offset = HDResolver.BundleOffset(packagePath);
             if (async)
             {
-                AssetBundle.LoadFromFileAsync(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false)).completed += OnAssetBundleLoaded;
+                AssetBundle.LoadFromFileAsync(AssetBundlePathResolver.instance.GetBundleFileRuntime(hashPath, false), 0, offset).completed += OnAssetBundleLoaded;
                 packageLoadedCalls.Enqueue(callBack);
             }
             else
             {
-                m_AssetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(packagePath, false));
+                m_AssetBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(hashPath, false), 0, offset);
                 if (m_AssetBundle != null)
                 {
                     isStreamedSceneAssetBundle = m_AssetBundle.isStreamedSceneAssetBundle;
@@ -249,7 +251,7 @@ namespace AssetSystem
 
         private string GetAssetNameByPath(string path)
         {
-            return System.IO.Path.GetFileName(path);
+            return System.IO.Path.GetFileNameWithoutExtension(path);
         }
 
         //自身是否还持有资源引用或被其他包引用

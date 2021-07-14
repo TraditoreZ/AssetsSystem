@@ -77,7 +77,7 @@ public class GameMain : MonoBehaviour
 
     private void HotDown()
     {
-        AssetDownload.ResourceUpdateOnRemote("http://192.168.11.20:8080/assetbundle", new BaseHotDownload());
+        AssetDownload.ResourceUpdateOnRemote("http://192.168.11.20:8080/testAssetbundle", new BaseHotDownload());
         hotdown.SetActive(true);
         startBtn.gameObject.SetActive(false);
         hotdownBtn.gameObject.SetActive(false);
@@ -101,10 +101,10 @@ public class GameMain : MonoBehaviour
         progressText.text = progress.ToString();
     }
 
-    private void ProcessCallBack(string assetName, long currtSize, long maxSize, int index, int count)
+    private void ProcessCallBack(long currtSize, long maxSize, long speed)
     {
         progress.value = (float)currtSize / maxSize;
-        progressText.text = string.Format("{0} kb / {1} kb  {2:f2}%    {3:f2} mb/s", currtSize / 1024, maxSize / 1024, ((float)currtSize / maxSize) * 100, AssetDownload.instance.downloader.DownloadSpeed() / (1024 * 1024));
+        progressText.text = string.Format("{0} kb / {1} kb  {2:f2}%    {3:f2} mb/s", currtSize / 1024, maxSize / 1024, ((float)currtSize / maxSize) * 100, speed / (1024 * 1024));
     }
 
 

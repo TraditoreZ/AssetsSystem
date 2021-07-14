@@ -48,13 +48,13 @@ namespace AssetSystem
 
         public static bool CullingLocalResource(ref ModifyData modifyData)
         {
+            if (modifyData == null || modifyData.datas == null)
+                return false;
             AssetBundle localBundle = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
             if (localBundle == null)
                 return false;
             AssetBundleManifest localManifest = localBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
             if (localManifest == null)
-                return false;
-            if (modifyData == null || modifyData.datas == null)
                 return false;
             string[] localAssetbundles = localManifest.GetAllAssetBundles();
             List<ModifyData.ModifyCell> cells = new List<ModifyData.ModifyCell>();
@@ -89,27 +89,9 @@ namespace AssetSystem
             List<ModifyData.ModifyCell> cells = new List<ModifyData.ModifyCell>();
             foreach (var modifyCell in modifyData.datas)
             {
-                string assetPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(modifyCell.name);
+                string assetPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(modifyCell.bundleHash + Path.GetExtension(modifyCell.name));
                 FileInfo fileInfo = new FileInfo(assetPath);
-                if (fileInfo.Exists)
-                {
-                    if (!modifyCell.bundleHash.Equals(allManifest.GetAssetBundleHash(modifyCell.name).ToString()))
-                    {
-                        cells.Add(modifyCell);
-                        Debug.Log("资源bundle md5变化, 需要热更新:" + modifyCell.name);
-                    }
-                    else if (!fileInfo.Length.Equals(modifyCell.size))
-                    {
-                        cells.Add(modifyCell);
-                        Debug.Log("资源大小发生改变, 需要热更新:" + modifyCell.name);
-                    }
-                    else if (checkMD5 && !GetFileHash(assetPath).Equals(modifyCell.fileHash))
-                    {
-                        cells.Add(modifyCell);
-                        Debug.Log("资源文件MD5发生改变, 需要热更新:" + modifyCell.name);
-                    }
-                }
-                else
+                if (!fileInfo.Exists)
                 {
                     cells.Add(modifyCell);
                     Debug.Log("资源不存在, 需要热更新:" + modifyCell.name);
@@ -210,23 +192,17 @@ namespace AssetSystem
                     }
                     return fileMD5;
                 }
-                // using (HashAlgorithm hash = HashAlgorithm.Create())
-                // {
-                //     using (FileStream file = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                //     {
-                //         //哈希算法根据文本得到哈希码的字节数组 
-                //         byte[] hashByte = hash.ComputeHash(file);
-                //         hash.Dispose();
-                //         //将字节数组装换为字符串 
-                //         return BitConverter.ToString(hashByte);
-                //     }
-                // }
             }
             catch (FileNotFoundException e)
             {
                 Debug.LogError(e);
                 return "";
             }
+        }
+
+        public static ulong BundleOffset(string bundleName)
+        {
+            return (ulong)(bundleName.GetHashCode() & int.MaxValue) % 100 + 1;
         }
 
         public static string[] GetBundleSourceFileBundles()

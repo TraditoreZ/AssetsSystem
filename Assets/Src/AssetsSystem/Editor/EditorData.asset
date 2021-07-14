@@ -17,6 +17,6 @@ MonoBehaviour:
   options: 256
   lastBuildTarger: 13
   increment: 1
-  incrementPath: D:/tomcat/webapps/assetbundle
-  version: 3
+  incrementPath: D:/tomcat/webapps/testAssetbundle
+  version: 1
   sourceVersion: 0
