@@ -363,15 +363,18 @@ namespace AssetSystem
         {
             ulong offset = HDResolver.BundleOffset(assetName);
             AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(fileName), 0, offset);
-            string[] names = ab.GetAllAssetNames();
-            foreach (var name in names)
+            string binaryDataName = Path.GetFileNameWithoutExtension(assetName) + "_binaryData.txt";
+            TextAsset taBinaryData = ab.LoadAsset<TextAsset>(binaryDataName);
+            string[] assets = taBinaryData.text.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var name in assets)
             {
-                string targerPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(name.Substring(0, name.Length - 6).Replace("assets/", ""));
+                string targerPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(name);
                 if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(targerPath)))
                 {
                     System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(targerPath));
                 }
-                TextAsset ta = ab.LoadAsset<TextAsset>(name);
+                string bundlePath = "assets/" + name.ToLower() + ".bytes";
+                TextAsset ta = ab.LoadAsset<TextAsset>(bundlePath);
                 using (FileStream fs = new FileStream(targerPath, FileMode.OpenOrCreate))
                 {
                     fs.Write(ta.bytes, 0, ta.bytes.Length);

@@ -104,6 +104,7 @@ public class CoroutineHttpDownload : MonoBehaviour
             if (reConnectionCount > 0)
             {
                 Debug.LogWarning(data.url + "  Download Faild. reConnectionCount:" + reConnectionCount);
+                downloadTotalLength -= (long)www.downloadedBytes;
                 yield return DownloadUnit(data, reConnectionCount - 1);
             }
             else

@@ -108,14 +108,21 @@ namespace AssetEditor
                     EditorUtility.DisplayCancelableProgressBar(string.Format("AssetBundleBuild[{0}/{1}]               {2:f2} mb", index, max, bundlesize += pack.size_MB), pack.packageName, (float)index++ / max);
                     AssetBundleBuild abb = new AssetBundleBuild();
                     abb.assetBundleName = pack.packageName;
-                    abb.assetNames = pack.assets.ToArray();
+
                     if (pack.binary)
                     {
-                        for (int i = 0; i < abb.assetNames.Length; i++)
+                        List<string> assets = pack.assets.ToList();
+                        for (int i = 0; i < assets.Count; i++)
                         {
-                            string path = abb.assetNames[i];
-                            abb.assetNames[i] = path + ".bytes";
+                            string path = assets[i];
+                            assets[i] = path + ".bytes";
                         }
+                        assets.Add(GetBinaryDataPath(abb.assetBundleName).Replace(Application.dataPath, "Assets"));
+                        abb.assetNames = assets.ToArray();
+                    }
+                    else
+                    {
+                        abb.assetNames = pack.assets.ToArray();
                     }
                     abbLists.Add(abb);
                 }
@@ -138,9 +145,10 @@ namespace AssetEditor
                 {
                     DeleteBinaryAsset(packsDic.Values.ToArray());
                 }
+                watch.Reset();
                 EditorUtility.ClearProgressBar();
                 AssetDatabase.Refresh();
-                watch.Reset();
+                System.GC.Collect();
             }
         }
 
@@ -290,6 +298,7 @@ namespace AssetEditor
             {
                 File.Copy(Path.Combine(GetOutDataPath(buildTarget), HDResolver.GetModifyListName(version)), Path.Combine(packagePath, AssetBundlePathResolver.GetBundlePlatformOutput(buildTarget) + "_Data", HDResolver.GetModifyListName(version)), true);
             }
+            System.GC.Collect();
             AssetDatabase.Refresh();
         }
 
@@ -356,11 +365,21 @@ namespace AssetEditor
                 {
                     int index = 0;
                     int max = package.assets.Count;
+                    string binaryDataPath = GetBinaryDataPath(package.packageName);
+                    if (System.IO.File.Exists(binaryDataPath))
+                        System.IO.File.Delete(binaryDataPath);
                     foreach (var asset in package.assets)
                     {
                         EditorUtility.DisplayCancelableProgressBar("[GenerateBinaryAsset]    " + package.packageName, asset, (float)index++ / max);
                         string binaryPath = asset + ".bytes";
                         System.IO.File.Copy(asset, binaryPath, true);
+                        string sourcePath = new System.IO.FileInfo(asset).FullName.Replace("\\", "/").Replace(Application.dataPath + "/", "");
+                        using (StreamWriter sw = new StreamWriter(binaryDataPath, true))
+                        {
+                            sw.WriteLine(sourcePath);
+                            sw.Flush();
+                            sw.Close();
+                        }
                     }
                 }
             }
@@ -377,9 +396,16 @@ namespace AssetEditor
                     {
                         System.IO.File.Delete(asset + ".bytes");
                     }
+                    string binaryDataPath = GetBinaryDataPath(package.packageName);
+                    System.IO.File.Delete(binaryDataPath);
                 }
             }
             AssetDatabase.Refresh();
+        }
+
+        static string GetBinaryDataPath(string packageName)
+        {
+            return Application.dataPath + "/" + Path.GetFileNameWithoutExtension(packageName) + "_binaryData.txt";
         }
 
         static void EncryptedBundle(string[] bundles, AssetBundleManifest manifest, string path)
@@ -389,18 +415,23 @@ namespace AssetEditor
             {
                 string newBundlePath = Path.Combine(path, bundle.Replace(Path.GetFileNameWithoutExtension(bundle), manifest.GetAssetBundleHash(bundle).ToString()));
                 File.Move(Path.Combine(path, Path.GetFileName(bundle)), newBundlePath);
-                // TODO bundle加密部分
                 ulong offset = HDResolver.BundleOffset(bundle);
-                Debug.Log("bundle:" + bundle + "    offset:" + offset);
                 using (var fileStream = new FileStream(newBundlePath, FileMode.Open, FileAccess.ReadWrite))
                 {
-                    if (sourceBytes.Length < fileStream.Length)
+                    int sourceLengh = sourceBytes.Length;
+                    while (sourceLengh < fileStream.Length)
                     {
-                        sourceBytes = new byte[fileStream.Length];
+                        sourceLengh = sourceLengh * 2;
+                    }
+                    if (sourceBytes.Length < sourceLengh)
+                    {
+                        sourceBytes = new byte[sourceLengh];
                     }
                     fileStream.Read(sourceBytes, 0, (int)fileStream.Length);
                     fileStream.Seek((int)offset, SeekOrigin.Begin);
                     fileStream.Write(sourceBytes, 0, (int)fileStream.Length);
+                    fileStream.Flush();
+                    fileStream.Close();
                 }
             }
         }
