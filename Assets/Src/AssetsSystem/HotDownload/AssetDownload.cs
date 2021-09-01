@@ -213,7 +213,7 @@ namespace AssetSystem
             for (int i = 0; i < data.datas.Length; i++)
             {
                 ModifyData.ModifyCell cell = data.datas[i];
-                string hashName = cell.bundleHash + Path.GetExtension(cell.name);
+                string hashName = AssetBundlePathResolver.GetBundleUniqueHashName(cell.name, cell.bundleHash);
                 datas[i] = new DownloadReqData()
                 {
                     url = string.Format("{0}/{1}/{2}", remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime(), hashName),
@@ -231,7 +231,7 @@ namespace AssetSystem
                 }
                 else
                 {
-                    ErrorEvent?.Invoke("DownloadAssets Error");
+                    ErrorEvent?.Invoke("DownloadAssets Error:" + CoroutineHttpDownload.instance.ErrorMessage);
                 }
             }, (downLoadCurrtSize, downLoadMaxSize, speedPreSecond) =>
             {
@@ -292,7 +292,7 @@ namespace AssetSystem
             AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
             AssetBundleManifest allManifest = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
             ulong offset = HDResolver.BundleOffset("bundle.rule");
-            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile(allManifest.GetAssetBundleHash("bundle.rule") + ".rule"), 0, offset);
+            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleSourceFile(AssetBundlePathResolver.GetBundleUniqueHashName("bundle.rule", allManifest.GetAssetBundleHash("bundle.rule").ToString())), 0, offset);
             string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             ab.Unload(true);
             ruleAB.Unload(true);
@@ -327,7 +327,7 @@ namespace AssetSystem
             AssetBundle ab = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.instance.GetBundlePlatformRuntime()));
             AssetBundleManifest allManifest = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
             ulong offset = HDResolver.BundleOffset("bundle.rule");
-            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(allManifest.GetAssetBundleHash("bundle.rule") + ".rule"), 0, offset);
+            AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.GetBundleUniqueHashName("bundle.rule", allManifest.GetAssetBundleHash("bundle.rule").ToString())), 0, offset);
             string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             var rules = new List<AssetBundleRule>();
             AssetBundleBuildConfig.ResolveRule(rules, commands);
@@ -344,7 +344,7 @@ namespace AssetSystem
                         && rule.options.Where(item => item.Contains("binary")).Count() > 0
                         && rule.options.Where(item => item.Contains("unzip")).Count() > 0)
                         {
-                            string assetHashPath = allManifest.GetAssetBundleHash(assetName) + Path.GetExtension(assetName);
+                            string assetHashPath = AssetBundlePathResolver.GetBundleUniqueHashName(assetName, allManifest.GetAssetBundleHash(assetName).ToString());
                             Debug.Log("解压资源:" + rule.packName + "\r\n哈希路径:" + assetHashPath);
                             UnzipCell(assetName, assetHashPath);
                             yield return null;

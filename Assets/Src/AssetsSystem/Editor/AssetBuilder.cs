@@ -413,7 +413,12 @@ namespace AssetEditor
             byte[] sourceBytes = new byte[1048576];
             foreach (var bundle in bundles)
             {
-                string newBundlePath = Path.Combine(path, bundle.Replace(Path.GetFileNameWithoutExtension(bundle), manifest.GetAssetBundleHash(bundle).ToString()));
+                string newBundlePath = Path.Combine(path, AssetBundlePathResolver.GetBundleUniqueHashName(bundle, manifest.GetAssetBundleHash(bundle).ToString()));
+                if (File.Exists(newBundlePath))
+                {
+                    Debug.LogError("Warrn AssetBundle hash conflict. need delete assetBundle: " + newBundlePath);
+                    File.Delete(newBundlePath);
+                }
                 File.Move(Path.Combine(path, Path.GetFileName(bundle)), newBundlePath);
                 ulong offset = HDResolver.BundleOffset(bundle);
                 using (var fileStream = new FileStream(newBundlePath, FileMode.Open, FileAccess.ReadWrite))

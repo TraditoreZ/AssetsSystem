@@ -19,7 +19,7 @@ namespace AssetSystem
         public override void LoadPackage(string packagePath, bool async, Action<IAssetPackage> callBack = null)
         {
             base.LoadPackage(packagePath, async, callBack);
-            string hashPath = packagePath.Replace(System.IO.Path.GetFileNameWithoutExtension(packagePath), BundleLoader.bundleHashDic[packagePath]);
+            string hashPath = BundleLoader.bundleHashDic[packagePath];
             ulong offset = HDResolver.BundleOffset(packagePath);
             if (async)
             {

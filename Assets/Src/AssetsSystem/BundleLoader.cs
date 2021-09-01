@@ -310,11 +310,11 @@ namespace AssetSystem
                 var bundles = allManifest.GetAllAssetBundles();
                 foreach (var bundle in bundles)
                 {
-                    bundleHashDic.Add(bundle, allManifest.GetAssetBundleHash(bundle).ToString());
+                    bundleHashDic.Add(bundle, AssetBundlePathResolver.GetBundleUniqueHashName(bundle, allManifest.GetAssetBundleHash(bundle).ToString()));
                     allDependencies.Add(bundle, allManifest.GetAllDependencies(bundle));
                 }
                 ulong offset = HDResolver.BundleOffset("bundle.rule");
-                AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(allManifest.GetAssetBundleHash("bundle.rule") + ".rule"), 0, offset);
+                AssetBundle ruleAB = AssetBundle.LoadFromFile(AssetBundlePathResolver.instance.GetBundleFileRuntime(AssetBundlePathResolver.GetBundleUniqueHashName("bundle.rule", allManifest.GetAssetBundleHash("bundle.rule").ToString())), 0, offset);
                 string[] commands = ruleAB.LoadAllAssets<TextAsset>().FirstOrDefault().text.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                 assetBundle.Unload(true);
                 ruleAB.Unload(true);

@@ -7,9 +7,12 @@ using UnityEngine.Networking;
 
 public class CoroutineHttpDownload : MonoBehaviour
 {
-
-    const int ThreadContMax = 16;
-
+    // 最大下载数量
+    const int ThreadContMax = 32;
+    // 重新连接延迟(秒)
+    const int reConnectionDelay = 1;
+    // 重新连接次数
+    const int reConnectionCount = 5;
     private static CoroutineHttpDownload _instance;
 
     public static CoroutineHttpDownload instance
@@ -28,6 +31,7 @@ public class CoroutineHttpDownload : MonoBehaviour
     }
     public long downloadTotalLength { get; private set; }
     public long downLoadMaxSize { get; private set; }
+    public string ErrorMessage { get; private set; }
     private Queue<DownloadReqData> tasks = new Queue<DownloadReqData>();
     private Action<bool> resultCallBack;
     private Action<long, long, long> processAndSpeed;
@@ -53,8 +57,8 @@ public class CoroutineHttpDownload : MonoBehaviour
             int needStartThread = ThreadContMax - threadStard;
             for (int i = 0; i < needStartThread; i++)
             {
+                threadStard += 1;
                 StartCoroutine(DownloadThread());
-                threadStard++;
             }
         }
     }
@@ -67,7 +71,7 @@ public class CoroutineHttpDownload : MonoBehaviour
             DownloadReqData data = tasks.Dequeue();
             yield return DownloadUnit(data);
         }
-        threadStard--;
+        threadStard -= 1;
         if (threadStard == 0)
         {
             resultCallBack?.Invoke(true);
@@ -80,7 +84,7 @@ public class CoroutineHttpDownload : MonoBehaviour
     }
 
 
-    private IEnumerator DownloadUnit(DownloadReqData data, int reConnectionCount = 3)
+    private IEnumerator DownloadUnit(DownloadReqData data, int reConnectionCount = reConnectionCount)
     {
         if (!Directory.Exists(Path.GetDirectoryName(data.filePath)))
         {
@@ -105,6 +109,7 @@ public class CoroutineHttpDownload : MonoBehaviour
             {
                 Debug.LogWarning(data.url + "  Download Faild. reConnectionCount:" + reConnectionCount);
                 downloadTotalLength -= (long)www.downloadedBytes;
+                yield return new WaitForSeconds(1);
                 yield return DownloadUnit(data, reConnectionCount - 1);
             }
             else
@@ -123,7 +128,7 @@ public class CoroutineHttpDownload : MonoBehaviour
 
     private void Error(string error)
     {
-        Debug.LogError(error);
+        ErrorMessage = error;
         StopAllCoroutines();
         tasks.Clear();
         downloadTotalLength = 0;

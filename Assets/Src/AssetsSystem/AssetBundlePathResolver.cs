@@ -150,5 +150,29 @@ namespace AssetSystem
                 return cacheDir.FullName;
             }
         }
+
+        /// <summary>获取bundle 唯一 hash</summary>
+        /// <returns>string: 唯一值(64) = 文件名称md5(32) + bundleMD5(32)</returns>
+        public static string GetBundleUniqueHashName(string bundle, string assetBundleHash)
+        {
+            return GetMD5(bundle) + assetBundleHash + Path.GetExtension(bundle);
+        }
+
+        /// <summary>获取MD5码</summary>
+        /// <returns>string: MD5</returns>
+        public static string GetMD5(string sDataIn)
+        {
+            System.Security.Cryptography.MD5CryptoServiceProvider md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+            byte[] bytValue, bytHash;
+            bytValue = System.Text.Encoding.UTF8.GetBytes(sDataIn);
+            bytHash = md5.ComputeHash(bytValue);
+            md5.Clear();
+            string sTemp = "";
+            for (int i = 0; i < bytHash.Length; i++)
+            {
+                sTemp += bytHash[i].ToString("X").PadLeft(2, '0');
+            }
+            return sTemp.ToLower();
+        }
     }
 }

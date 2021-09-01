@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 967224976d89f8f41ae35b3845181d18, type: 3}
   m_Name: EditorData
   m_EditorClassIdentifier: 
-  baseConfigPath: Assets/Src/AssetsSystem/Editor/basePackageCfg
+  baseConfigPath: E:/AssetsSystem/Assets/Src/AssetsSystem/Editor/exampleCfg.txt
   splitConfigPath: Assets/Src/AssetsSystem/Editor/exampleCfg
   options: 256
   lastBuildTarger: 13
   increment: 1
   incrementPath: D:/tomcat/webapps/testAssetbundle
-  version: 1
-  sourceVersion: 0
+  version: 2
+  sourceVersion: 1
