@@ -241,7 +241,7 @@ namespace AssetSystem
 
         void DownloadManifest(string version, ModifyData data)
         {
-            string url = string.Format("{0}/{1}/{2}", remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime(), AssetBundlePathResolver.instance.GetBundlePlatformRuntime());
+            string url = string.Format("{0}/{1}_Data/v{2}_manifest", remoteUrl, AssetBundlePathResolver.instance.GetBundlePlatformRuntime(), version);
             downloader.Download(url, null, (ok, bytes) =>
             {
                 if (ok)

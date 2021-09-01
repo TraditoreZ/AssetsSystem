@@ -89,12 +89,12 @@ namespace AssetSystem
             List<ModifyData.ModifyCell> cells = new List<ModifyData.ModifyCell>();
             foreach (var modifyCell in modifyData.datas)
             {
-                string assetPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(modifyCell.bundleHash + Path.GetExtension(modifyCell.name));
+                string assetPath = AssetBundlePathResolver.instance.GetBundlePersistentFile(AssetBundlePathResolver.GetBundleUniqueHashName(modifyCell.name, modifyCell.bundleHash));
                 FileInfo fileInfo = new FileInfo(assetPath);
                 if (!fileInfo.Exists)
                 {
                     cells.Add(modifyCell);
-                    Debug.Log("资源不存在, 需要热更新:" + modifyCell.name);
+                    Debug.Log("资源不存在或发生变化, 需要热更新:" + modifyCell.name);
                 }
             }
             allManifest = null;
