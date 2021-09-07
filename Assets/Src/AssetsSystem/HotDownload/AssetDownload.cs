@@ -375,7 +375,7 @@ namespace AssetSystem
                 }
                 string bundlePath = "assets/" + name.ToLower() + ".bytes";
                 TextAsset ta = ab.LoadAsset<TextAsset>(bundlePath);
-                using (FileStream fs = new FileStream(targerPath, FileMode.OpenOrCreate))
+                using (FileStream fs = new FileStream(targerPath, FileMode.CreateNew))
                 {
                     fs.Write(ta.bytes, 0, ta.bytes.Length);
                     fs.Close();
